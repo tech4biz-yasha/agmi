@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+- inspeximus adapter (inspeximus 2.38.0, SQLite store with an opt-in signed
+  receipt chain and a chain head kept in the user's config home), three rows:
+  receipts off reads like LangGraph, five accepted; receipts on with the
+  attacker holding the store's directory, five reported; receipts on with the
+  attacker also holding the config home, four reported and a tail truncation
+  accepted. Detection is the tool's audit call, not the read path.
+
 ## 0.5.0 (2026-09-14)
 - License (MIT), authorship, file headers, contributing and security
   policy, CI workflow.

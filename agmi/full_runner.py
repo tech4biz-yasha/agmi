@@ -27,6 +27,15 @@ def full_scorecard() -> str:
         letta_row = ("letta-block-history", LettaBlockHistoryAdapter(), None)
     except ImportError:
         letta_row = None
+    try:
+        import inspeximus  # noqa: F401 - the adapter imports it lazily, so probe for it here
+        from agmi.adapters.inspeximus_rows import (InspeximusDefaultAdapter, InspeximusRowsSidecarAdapter,
+                                                   InspeximusRowsSidecarHeadAdapter)
+        inspeximus_rows = [("inspeximus-default", InspeximusDefaultAdapter(), None),
+                           ("inspeximus-rcpt+dir", InspeximusRowsSidecarAdapter(), None),
+                           ("inspeximus-rcpt+dir+home", InspeximusRowsSidecarHeadAdapter(), None)]
+    except ImportError:
+        inspeximus_rows = []
     from agmi.adapters.naive_memory import NaiveMemoryAdapter
     from agmi.attacks.at_rest import ALL_AT_REST_ATTACKS
     from agmi.attacks.memory_specific import ALL_MEMORY_ATTACKS
@@ -41,6 +50,7 @@ def full_scorecard() -> str:
         ("langgraph-sqlite", LangGraphSqliteAdapter(), None),
         *([letta_row] if letta_row else []),
         *([mem0_row] if mem0_row else []),
+        *inspeximus_rows,
         ("naive-mem(scoped)", None,
          NaiveMemoryAdapter(enforce_user_scope=True)),
         ("naive-mem(unscoped)", None,

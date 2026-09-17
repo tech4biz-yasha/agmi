@@ -23,6 +23,7 @@ dev = ["pytest"]
 langgraph = ["langgraph-checkpoint-sqlite"]
 letta = ["letta", "asyncpg", "psycopg2-binary", "pgvector", "pgserver"]
 mem0 = ["mem0ai", "qdrant-client"]
+inspeximus = ["inspeximus[crypto]>=2.38.0"]
 
 [project.scripts]
 agmi = "agmi.runner:main"
