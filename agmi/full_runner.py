@@ -213,7 +213,9 @@ def full_scorecard() -> str:
 
     short = {
         "tamper": "tamp", "truncate": "trunc", "delete_middle": "delMid",
-        "reorder": "reord", "forge": "forge", "memory_injection": "inject",
+        "reorder": "reord", "forge": "forge",
+        "cross_replay": "xReplay", "rollback_replay": "rollbk",
+        "metadata_tamper": "metaTmp", "memory_injection": "inject",
         "cross_session_bleed": "bleed", "retrieval_hijack": "hijack",
         "indirect_prompt_injection": "promptInj",
         "update_poisoning": "update",

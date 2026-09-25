@@ -7,6 +7,9 @@
     "delete_middle": 1,
     "reorder": 1,
     "forge": 1,
+    "cross_replay": 1,
+    "rollback_replay": 1,
+    "metadata_tamper": 1,
     "memory_injection": 3,
     "cross_session_bleed": 2,
     "retrieval_hijack": 4,
@@ -20,6 +23,9 @@
     "delete_middle": "store-access",
     "reorder": "store-access",
     "forge": "store-access",
+    "cross_replay": "store-access",
+    "rollback_replay": "store-access",
+    "metadata_tamper": "store-access",
     "memory_injection": "write-access",
     "cross_session_bleed": "write-access",
     "retrieval_hijack": "write-access",
@@ -57,6 +63,21 @@
           "status": "safe",
           "verdict": "detected",
           "detail": "detected on reload (chain break at seq 5)"
+        },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": "adapter does not model a second context"
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": "adapter does not support replay"
+        },
+        "metadata_tamper": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": "adapter does not expose record metadata"
         },
         "memory_injection": {
           "status": "n/a",
@@ -116,6 +137,21 @@
           "detail": "accepted silently"
         },
         "forge": {
+          "status": "VULNERABLE",
+          "verdict": "accepted",
+          "detail": "accepted silently"
+        },
+        "cross_replay": {
+          "status": "VULNERABLE",
+          "verdict": "accepted",
+          "detail": "accepted silently"
+        },
+        "rollback_replay": {
+          "status": "VULNERABLE",
+          "verdict": "accepted",
+          "detail": "accepted silently"
+        },
+        "metadata_tamper": {
           "status": "VULNERABLE",
           "verdict": "accepted",
           "detail": "accepted silently"
@@ -182,6 +218,21 @@
           "verdict": "n/a",
           "detail": ""
         },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "metadata_tamper": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
         "memory_injection": {
           "status": "VULNERABLE",
           "verdict": "surfaced",
@@ -195,7 +246,7 @@
         "retrieval_hijack": {
           "status": "VULNERABLE",
           "verdict": "surfaced",
-          "detail": "attacker entry took a slot from a genuine memory (external: 4 of 5, ranks 2, out, 1, 2, 1 of 3; laundered: 4 of 5, ranks 2, out, 1, 2, 1 of 3; agent-laundered: 4 of 5, ranks 2, out, 1, 2, 1 of 3)"
+          "detail": "attacker entry took a slot from a genuine memory (external: 5 of 5, ranks 2, 3, 1, 2, 1 of 3; laundered: 4 of 5, ranks 2, out, 1, 2, 1 of 3; agent-laundered: 5 of 5, ranks 2, 3, 1, 2, 1 of 3)"
         },
         "indirect_prompt_injection": {
           "status": "VULNERABLE",
@@ -243,6 +294,21 @@
           "status": "VULNERABLE",
           "verdict": "accepted",
           "detail": "accepted silently"
+        },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": "adapter does not model a second context"
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": "adapter does not support replay"
+        },
+        "metadata_tamper": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": "adapter does not expose record metadata"
         },
         "memory_injection": {
           "status": "n/a",
@@ -302,6 +368,21 @@
           "detail": ""
         },
         "forge": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "metadata_tamper": {
           "status": "n/a",
           "verdict": "n/a",
           "detail": ""
@@ -368,6 +449,21 @@
           "verdict": "accepted",
           "detail": "accepted silently"
         },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": "adapter does not model a second context"
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": "adapter does not support replay"
+        },
+        "metadata_tamper": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": "adapter does not expose record metadata"
+        },
         "memory_injection": {
           "status": "VULNERABLE",
           "verdict": "surfaced",
@@ -430,6 +526,21 @@
           "verdict": "accepted",
           "detail": "accepted silently"
         },
+        "cross_replay": {
+          "status": "VULNERABLE",
+          "verdict": "accepted",
+          "detail": "accepted silently"
+        },
+        "rollback_replay": {
+          "status": "VULNERABLE",
+          "verdict": "accepted",
+          "detail": "accepted silently"
+        },
+        "metadata_tamper": {
+          "status": "VULNERABLE",
+          "verdict": "accepted",
+          "detail": "accepted silently"
+        },
         "memory_injection": {
           "status": "VULNERABLE",
           "verdict": "surfaced",
@@ -470,7 +581,7 @@
         "tamper": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory 7628939cb5: its TEXT or KEY no longer matches its write receipt (edited after write)'])"
+          "detail": "detected on reload (verify_writes: ['memory 430d7b37bb: its TEXT or KEY no longer matches its write receipt (edited after write)'])"
         },
         "truncate": {
           "status": "reported",
@@ -485,12 +596,27 @@
         "reorder": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory d49d4e54b9: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
+          "detail": "detected on reload (verify_writes: ['memory 86da57ceb8: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
         },
         "forge": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: [\"1 record(s) are covered by NO write receipt, so nothing here vouches for them: ['f068663386']. They were inserted out of band, or written )"
+          "detail": "detected on reload (verify_writes: [\"1 record(s) are covered by NO write receipt, so nothing here vouches for them: ['f0b0007ad1']. They were inserted out of band, or written )"
+        },
+        "cross_replay": {
+          "status": "VULNERABLE",
+          "verdict": "accepted",
+          "detail": "accepted silently"
+        },
+        "rollback_replay": {
+          "status": "reported",
+          "verdict": "reported",
+          "detail": "detected on reload (verify_writes: ['memory d0049c47e2: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
+        },
+        "metadata_tamper": {
+          "status": "reported",
+          "verdict": "reported",
+          "detail": "detected on reload (verify_writes: ['memory c6a4a209ab: a field its receipt commits to no longer matches its write receipt (edited after write)'])"
         },
         "memory_injection": {
           "status": "n/a",
@@ -532,7 +658,7 @@
         "tamper": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory bb58e2b2e3: its TEXT or KEY no longer matches its write receipt (edited after write)'])"
+          "detail": "detected on reload (verify_writes: ['memory 381c93713c: its TEXT or KEY no longer matches its write receipt (edited after write)'])"
         },
         "truncate": {
           "status": "VULNERABLE",
@@ -547,12 +673,27 @@
         "reorder": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory 0f0b3c409f: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
+          "detail": "detected on reload (verify_writes: ['memory ac000fa9f9: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
         },
         "forge": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: [\"1 record(s) are covered by NO write receipt, so nothing here vouches for them: ['f0bbdba2a0']. They were inserted out of band, or written )"
+          "detail": "detected on reload (verify_writes: [\"1 record(s) are covered by NO write receipt, so nothing here vouches for them: ['f0e8f4f7e6']. They were inserted out of band, or written )"
+        },
+        "cross_replay": {
+          "status": "VULNERABLE",
+          "verdict": "accepted",
+          "detail": "accepted silently"
+        },
+        "rollback_replay": {
+          "status": "reported",
+          "verdict": "reported",
+          "detail": "detected on reload (verify_writes: ['memory e5d1ff40cb: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
+        },
+        "metadata_tamper": {
+          "status": "reported",
+          "verdict": "reported",
+          "detail": "detected on reload (verify_writes: ['memory 2cf49919c3: a field its receipt commits to no longer matches its write receipt (edited after write)'])"
         },
         "memory_injection": {
           "status": "n/a",
@@ -612,6 +753,21 @@
           "detail": ""
         },
         "forge": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "metadata_tamper": {
           "status": "n/a",
           "verdict": "n/a",
           "detail": ""
@@ -678,6 +834,21 @@
           "verdict": "n/a",
           "detail": ""
         },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "metadata_tamper": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
         "memory_injection": {
           "status": "VULNERABLE",
           "verdict": "surfaced",
@@ -736,6 +907,21 @@
           "detail": ""
         },
         "forge": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "metadata_tamper": {
           "status": "n/a",
           "verdict": "n/a",
           "detail": ""
@@ -802,6 +988,21 @@
           "verdict": "n/a",
           "detail": ""
         },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "metadata_tamper": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
         "memory_injection": {
           "status": "VULNERABLE",
           "verdict": "surfaced",
@@ -860,6 +1061,21 @@
           "detail": ""
         },
         "forge": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "cross_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "rollback_replay": {
+          "status": "n/a",
+          "verdict": "n/a",
+          "detail": ""
+        },
+        "metadata_tamper": {
           "status": "n/a",
           "verdict": "n/a",
           "detail": ""
