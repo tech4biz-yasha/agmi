@@ -1,6 +1,6 @@
 [project]
 name = "agent-memory-integrity"
-version = "0.5.0"
+version = "0.6.0"
 description = "Agent Memory Integrity (agmi): a conformance test suite that measures whether AI agent memory and checkpoint stores notice tampering"
 readme = "README.md"
 license = {file = "LICENSE"}

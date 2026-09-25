@@ -1,6 +1,32 @@
 # Changelog
 
 ## Unreleased
+
+## 0.6.0 (2026-09-25)
+- The eight-edit at-rest scorecard. Three storage-level edits join the
+  five: T6 cross-context replay (a genuine record from another
+  thread/user/session copied over this one, keeping its identity), T7
+  rollback replay (an older genuine record of the same context copied
+  over its newest), T8 metadata tamper (owner, source or timestamp
+  changed, content untouched). T6 and T7 use only bytes the store itself
+  wrote, in the wrong place, and are the edits that separate encryption
+  from integrity. Wired into LangGraph SqliteSaver, Letta block history,
+  Mem0 local Qdrant and the inspeximus rows through three optional adapter
+  hooks (`seed_other`/`read_other_raw`/`replay_onto`, `read_meta`/
+  `write_meta`); an adapter without them reports n/a, never a pass. A
+  self-validating reference at-rest store (`reference_atrest.py`, HMAC
+  over content, context, position, previous tag and metadata, plus a
+  signed head) catches all eight, so a VULNERABLE cell is a proven
+  finding. Measured: LangGraph, Letta, Mem0 and inspeximus-default accept
+  all eight. inspeximus with receipts on catches T7 and T8 but accepts T6:
+  a receipt binds a record's text and key, not the user it belongs to, so
+  a signed record lifted from another user still passes the audit. OpenFang
+  is a single-agent hash chain with no second context or metadata layer
+  and is scored on T1 to T5. The edits, verdict words and control cases
+  are the ones proposed as the test method for IETF
+  draft-han-bmwg-agent-security-benchmark metric 5.4.7 (bmwg list,
+  24 Sep 2026); the at-rest read-time pass word is now `rejected`
+  (was `detected`), with `reported` and `accepted` unchanged.
 - Two defended inspeximus rows on the scorecard, from its maintainer's
   PR #4: the tool's own provenance plus a trust root keyed on the label,
   and the same filter keyed on a per-user Ed25519 key the writer attests
