@@ -1,6 +1,14 @@
 # Changelog
 
 ## Unreleased
+- `agmi-check` and a GitHub Action (`action.yml`): one command, one CI
+  step, runs the at-rest edits against a single adapter and fails the job
+  on any ACCEPTED edit. Labels are T1 to T5 and verdicts are REJECTED,
+  REPORTED (audit-time detection) or ACCEPTED, the words proposed for
+  IETF draft-han-bmwg-agent-security-benchmark 5.4.7. Exit 2 when no edit
+  could be evaluated, so a store that cannot reopen never scores a pass.
+  Front-door adapters are refused with a clear message. Writes a step
+  summary and one annotation per finding under GitHub Actions.
 - The memory agent (`agmi/agent/`, `python -m agmi.agent`): searches the
   six attacks, three channels and content-evasion mutations for the first
   that gets a false memory served as trusted, proves each landing, and

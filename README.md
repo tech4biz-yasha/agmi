@@ -71,6 +71,28 @@ Everything runs offline. No API keys, no model downloads, no Docker. The Letta r
 
 The memory-specific cells of tools that rank by an embedder (Mem0, the LangGraph store) are the one opt-in: they are measured with a real sentence embedder, so `pip install -e ".[embedder]"` adds sentence-transformers and the first run fetches all-MiniLM-L6-v2 (about 90 MB) into the local Hugging Face cache. Without it those cells print `n/a` rather than a number produced by a stand-in. `pytest -m embedder` runs the tests that need the model. inspeximus ranks lexically at these sizes, so its row runs offline.
 
+## Run it in your CI
+
+One step. The job fails the moment your store serves an edited record as genuine, and the row lands in the Actions summary.
+
+```yaml
+- uses: tech4biz-yasha/agmi@main
+  with:
+    adapter: agmi.adapters.langgraph_sqlite:LangGraphSqliteAdapter
+    extras: langgraph
+```
+
+For your own store, write an adapter against `agmi.adapters.base.MemoryAdapter` (see [Writing an adapter](#writing-an-adapter)), then point the action at it:
+
+```yaml
+- uses: tech4biz-yasha/agmi@main
+  with:
+    adapter: mystore.agmi_adapter:MyStoreAdapter
+    install: "."
+```
+
+Locally the same command is `agmi-check --adapter module:Class`. Exit 1 means at least one edit was ACCEPTED, exit 2 means nothing could be evaluated (the control cases failed), exit 0 means every edit was REJECTED or REPORTED. Add `--fail-on none` to record without failing, for example while a fix is in progress. Verdict words follow the method proposed for IETF draft-han-bmwg-agent-security-benchmark metric 5.4.7.
+
 ## Contents
 
 1. [Why this exists](#why-this-exists)

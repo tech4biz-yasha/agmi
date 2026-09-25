@@ -1,0 +1,71 @@
+name: "agmi: Agent Memory Integrity check"
+description: >-
+  Runs the agmi at-rest edits against a memory-store adapter and fails the
+  job if the store serves edited memory as genuine. Verdicts follow the
+  method proposed for IETF draft-han-bmwg-agent-security-benchmark 5.4.7.
+author: "Yasha Khandelwal"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  adapter:
+    description: >-
+      Adapter to test, as module:Class. Use one that ships with agmi
+      (for example agmi.adapters.langgraph_sqlite:LangGraphSqliteAdapter)
+      or one from your own package, importable after `install`.
+    required: true
+  extras:
+    description: >-
+      agmi pip extras to install, comma separated (langgraph, letta, mem0,
+      inspeximus). Leave empty when testing your own adapter.
+    required: false
+    default: ""
+  install:
+    description: >-
+      Extra pip install argument for your own package, for example "." or
+      "-e .[test]". Runs after agmi is installed.
+    required: false
+    default: ""
+  python-version:
+    description: "Python version to use."
+    required: false
+    default: "3.12"
+  fail-on:
+    description: "accepted (default) fails the job on any ACCEPTED edit; none never fails."
+    required: false
+    default: "accepted"
+
+outputs:
+  results:
+    description: "Path to the JSON results file."
+    value: ${{ steps.run.outputs.results }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Install agmi
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        if [ -n "${{ inputs.extras }}" ]; then
+          pip install "${{ github.action_path }}[${{ inputs.extras }}]"
+        else
+          pip install "${{ github.action_path }}"
+        fi
+        if [ -n "${{ inputs.install }}" ]; then
+          pip install ${{ inputs.install }}
+        fi
+    - name: Run agmi-check
+      id: run
+      shell: bash
+      env:
+        MEM0_TELEMETRY: "false"
+      run: |
+        agmi-check --adapter "${{ inputs.adapter }}" \
+                   --fail-on "${{ inputs.fail-on }}" \
+                   --json "${RUNNER_TEMP}/agmi-results.json"
+        echo "results=${RUNNER_TEMP}/agmi-results.json" >> "$GITHUB_OUTPUT"

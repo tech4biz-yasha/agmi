@@ -1,0 +1,38 @@
+name: action-selftest
+
+on:
+  push:
+    paths: ["action.yml", "agmi/check.py", ".github/workflows/action-selftest.yml"]
+  pull_request:
+    paths: ["action.yml", "agmi/check.py"]
+  workflow_dispatch:
+
+jobs:
+  langgraph:
+    # The action must run end to end and must fail on a store that accepts
+    # edits. LangGraph's SqliteSaver accepts all five, so the run is expected
+    # to fail; continue-on-error turns that into the passing case below.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - id: run
+        uses: ./
+        continue-on-error: true
+        with:
+          adapter: agmi.adapters.langgraph_sqlite:LangGraphSqliteAdapter
+          extras: langgraph
+      - name: The action failed the job on an accepting store, as designed
+        if: steps.run.outcome != 'failure'
+        run: |
+          echo "expected the action to fail on LangGraph SqliteSaver"
+          exit 1
+
+  inspeximus-receipts:
+    # Receipts on: every edit is REPORTED, so the action must pass.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./
+        with:
+          adapter: agmi.adapters.inspeximus_rows:InspeximusRowsSidecarAdapter
+          extras: inspeximus

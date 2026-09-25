@@ -30,6 +30,7 @@ embedder = ["sentence-transformers"]
 
 [project.scripts]
 agmi = "agmi.runner:main"
+agmi-check = "agmi.check:main"
 
 [project.urls]
 Homepage = "https://agentmemoryintegrity.org/"
