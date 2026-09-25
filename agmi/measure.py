@@ -7,6 +7,8 @@
     python -m agmi.measure --target mem0 --embedder minilm
     python -m agmi.measure --target langgraph-store --embedder minilm
     python -m agmi.measure --target inspeximus
+    python -m agmi.measure --target inspeximus-defended
+    python -m agmi.measure --target inspeximus-defended-key
 
 Prints the four cells for the target with the provenance line the adapter
 reports (library version, embedder, which of the tool's optional ranking
@@ -76,6 +78,30 @@ def _inspeximus(embedder: str):
     return InspeximusRecallAdapter()
 
 
+def _inspeximus_defended(embedder: str):
+    """inspeximus with the tool's own provenance and a trust root keyed on
+    the label: each memory's channel label is recorded as its ``source``,
+    the first-party label is the trust root, and ``trusted_only`` serves
+    only what is reachable from it. Whoever writes the label controls it,
+    so this holds on the external channel only."""
+    from agmi.adapters.inspeximus_recall import InspeximusRecallAdapter
+    from inspeximus import Inspeximus
+    return InspeximusRecallAdapter(
+        provenance=True, trust_seeds={Inspeximus._canon_source("user")},
+        recall_kwargs={"trusted_only": True}, label="inspeximus-defended")
+
+
+def _inspeximus_defended_key(embedder: str):
+    """The same filter keyed on the attested key instead of the label:
+    signed writes are bound to a per-user Ed25519 key on the write, those
+    keys are the trust root, and ``trusted_only`` serves only records they
+    attested. A label is no longer enough; a valid signature still is."""
+    from agmi.adapters.inspeximus_recall import InspeximusRecallAdapter
+    return InspeximusRecallAdapter(
+        provenance=True, attest=True, recall_kwargs={"trusted_only": True},
+        label="inspeximus-defended-key")
+
+
 def _mem0_live(embedder: str):
     """Mem0 with ``infer=True``: its default mode, where a hosted model
     extracts facts before storage. Needs a real OPENAI_API_KEY."""
@@ -93,6 +119,8 @@ TARGETS: dict[str, Callable[[str], SemanticMemoryAdapter]] = {
     "langgraph-store": _langgraph_store,
     "letta-archival": _letta_archival,
     "inspeximus": _inspeximus,
+    "inspeximus-defended": _inspeximus_defended,
+    "inspeximus-defended-key": _inspeximus_defended_key,
 }
 
 

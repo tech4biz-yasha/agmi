@@ -57,6 +57,7 @@ from pathlib import Path
 from agmi.adapters.semantic_base import (
     MemoryItem, Retrieved, SemanticMemoryAdapter,
 )
+from agmi.signing import KEYRING
 
 #: Row label as it appears on the scorecard. The runner may override it.
 LABEL = "inspeximus-default"
@@ -89,16 +90,45 @@ class InspeximusRecallAdapter(SemanticMemoryAdapter):
         ``prefer_trust``, ``rerank``, ``mmr``) as its own configuration row.
         Nothing else about the adapter changes, so a lever row differs from
         the default row by exactly that argument.
+    provenance:
+        Record each item's channel label as the memory's ``source``, the
+        field inspeximus resolves sources by. Off by default, so the default
+        row is unchanged: a store that keeps provenance is a different
+        configuration and gets its own row.
+    trust_seeds:
+        Canonical source strings the store treats as a trust root. With
+        ``recall_kwargs={"trusted_only": True}`` the read path serves only
+        memories reachable from that root. Empty by default. ``trusted_only``
+        with no seeds fails closed and serves nothing, which the positive
+        control reports as n/a rather than as a pass.
+    attest:
+        Bind each write that carries a valid suite signature to a per-user
+        Ed25519 key, through inspeximus's own ``remember(attestation=...)``,
+        and seed the store with those keys (``"key:<pubkey>"``). The store
+        then filters on the attested key, not on the label. Off by default.
+        inspeximus cannot verify the suite's HMAC model signature itself, so
+        the adapter plays the writer's signing step: it holds one Ed25519
+        key per user and signs only what ``agmi.signing.KEYRING`` verifies.
+        The store verifies the Ed25519 signature on the write (a bad one is
+        rejected) and ``trusted_only`` keeps only records whose attested
+        key is a seed.
     label:
         Scorecard row name. Defaults to ``LABEL``.
     """
 
     def __init__(self, mode: str = "auto", embed=None,
                  recall_kwargs: dict | None = None,
-                 label: str | None = None):
+                 label: str | None = None,
+                 provenance: bool = False,
+                 trust_seeds: set | None = None,
+                 attest: bool = False):
         self.mode = mode
         self.embed = embed
         self.recall_kwargs = dict(recall_kwargs or {})
+        self.provenance = provenance
+        self.trust_seeds = set(trust_seeds or ())
+        self.attest = attest
+        self._writer_keys: dict[str, tuple[str, str]] = {}
         self.name = label or LABEL
         self._dir: tempfile.TemporaryDirectory | None = None
         self._store = None
@@ -117,6 +147,8 @@ class InspeximusRecallAdapter(SemanticMemoryAdapter):
         path = Path(self._dir.name) / "memory.sqlite"
         kwargs = {"embed": self.embed} if self.embed is not None else {}
         self._store = Inspeximus(str(path), **kwargs)
+        if self.trust_seeds:
+            self._store.trust_seeds = set(self.trust_seeds)
 
     def close(self) -> None:
         """Drop the store and delete its directory. Idempotent."""
@@ -142,7 +174,25 @@ class InspeximusRecallAdapter(SemanticMemoryAdapter):
         meta.setdefault("source", item.source)
         if item.signature:
             meta.setdefault("signature", item.signature)
-        self._memory().remember(item.text, user_id=item.user_id, meta=meta)
+        extra: dict = {}
+        if self.provenance:
+            extra["source"] = {"doc": item.source}
+        if self.attest and KEYRING.verify(item.user_id, item.source, item.text,
+                                          item.signature):
+            extra["attestation"] = self._attestation(
+                item, item.source if self.provenance else None)
+        self._memory().remember(item.text, user_id=item.user_id, meta=meta,
+                                **extra)
+
+    def _attestation(self, item: MemoryItem, source_doc) -> tuple[str, str]:
+        """The writer's Ed25519 signature over the claim, and its key added
+        to the store's trust root."""
+        from inspeximus import attest, new_source_keypair
+        if item.user_id not in self._writer_keys:
+            self._writer_keys[item.user_id] = new_source_keypair()
+        secret, public = self._writer_keys[item.user_id]
+        self._memory().trust_seeds.add("key:" + public)
+        return public, attest(item.text, secret, source_doc)
 
     def retrieve(self, query: str, user_id: str, k: int = 5) -> list[Retrieved]:
         rows = self._memory().recall(query, k=k, user_id=user_id,
@@ -183,6 +233,13 @@ class InspeximusRecallAdapter(SemanticMemoryAdapter):
                    "300 memories" if self.mode == "auto" else f"mode={self.mode}")
         levers = (", " + ", ".join(f"{k}={v!r}" for k, v in self.recall_kwargs.items())
                   if self.recall_kwargs else "")
+        if self.provenance:
+            levers += ", provenance recorded as the memory's source"
+        if self.trust_seeds:
+            levers += ", trust_seeds=" + repr(sorted(self.trust_seeds))
+        if self.attest:
+            levers += (", signed writes attested with a per-user Ed25519 key "
+                       "and those keys seeded")
         return (f"inspeximus {inspeximus_version()}, receipts off, "
                 f"recall defaults ({ranking}){levers}, "
                 f"{platform.system()} {platform.machine()}, "
