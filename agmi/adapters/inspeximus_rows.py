@@ -65,12 +65,15 @@ from pathlib import Path
 from agmi.adapters.base import MemoryAdapter, Record
 
 SEED_TOKEN = "agmi-seed-"
+OTHER_TOKEN = "agmi-other-"
 
 
 class InspeximusRowsAdapter(MemoryAdapter):
     """Receipts on, signed; the attacker holds the SQLite file only."""
 
     name = "inspeximus-rows"
+    supports_replay = True
+    supports_metadata = True
 
     #: True: the attacker also holds the receipts sidecar and removes the matching receipt on
     #: delete_raw. Models write access to the store's directory (still not the signing key).
@@ -198,6 +201,71 @@ class InspeximusRowsAdapter(MemoryAdapter):
                                f"{memory_id}, dropped {len(chain) - len(kept)}; re-measure the "
                                f"sidecar row")
         rp.write_text(json.dumps(kept), encoding="utf-8")
+
+    # --- hooks for T6/T7/T8 -------------------------------------------
+    def seed_other(self, n: int) -> None:
+        """Seed a second context (a different meta.uid) in the same store."""
+        for i in range(n):
+            self._store.remember(f"{OTHER_TOKEN}{i}: the limit is {90 + i}",
+                                 key=f"other::{i}", user_id="ctx-B")
+
+    def read_other_raw(self) -> list[Record]:
+        conn = self._raw()
+        try:
+            rows = conn.execute("SELECT id, ord, doc FROM records "
+                                "ORDER BY ord ASC").fetchall()
+        finally:
+            conn.close()
+        out = []
+        j = 0
+        for rid, ordv, doc in rows:
+            d = json.loads(doc)
+            if (d.get("meta") or {}).get("uid") == "ctx-B":
+                out.append(Record(seq=j, fields={"id": rid, "ord": ordv, "doc": d}))
+                j += 1
+        return out
+
+    def replay_onto(self, victim_seq: int, donor: Record) -> None:
+        """Copy the donor doc onto the victim row, keeping the victim row's
+        id and ord. Genuine bytes, wrong place."""
+        target = self._row_at(victim_seq)
+        if target is None:
+            raise RuntimeError("no victim row at that position")
+        doc = dict(donor.fields["doc"])
+        doc["id"] = target["id"]
+        conn = self._raw()
+        try:
+            conn.execute("UPDATE records SET doc = ? WHERE id = ?",
+                         (json.dumps(doc), target["id"]))
+            conn.commit()
+        finally:
+            conn.close()
+
+    def read_meta(self, seq: int) -> dict:
+        row = self._row_at(seq)
+        if row is None:
+            return {}
+        doc = row["doc"]
+        return {"source": doc.get("source"), "meta": doc.get("meta"),
+                "ts": doc.get("ts"), "iso": doc.get("iso")}
+
+    def write_meta(self, seq: int, meta: dict) -> None:
+        target = self._row_at(seq)
+        if target is None:
+            raise RuntimeError("no row at that position")
+        doc = dict(target["doc"])
+        # move the record to another owner and flip its source to trusted,
+        # content untouched.
+        doc["meta"] = {**(doc.get("meta") or {}), "uid": "ctx-B",
+                       "agmi_meta_tampered": True}
+        doc["source"] = {"doc": "user"}
+        conn = self._raw()
+        try:
+            conn.execute("UPDATE records SET doc = ? WHERE id = ?",
+                         (json.dumps(doc), target["id"]))
+            conn.commit()
+        finally:
+            conn.close()
 
     # --- payload hooks -------------------------------------------------
     def mutate_payload(self, record: Record) -> Record:

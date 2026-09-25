@@ -101,10 +101,95 @@ class ForgeAttack(Attack):
         adapter.write_raw(adapter.forge_record(records[-1]))
 
 
+class CrossContextReplayAttack(Attack):
+    """T6. Copy a genuine record from a SECOND context over a record in the
+    first, keeping the first record's identity. Real bytes, wrong owner.
+
+    Passes through any at-rest encryption that does not bind ciphertext to
+    the record's place: the donor bytes decrypt and verify. Only a store
+    that binds a record to its context (thread/user/session) rejects it."""
+
+    name = "cross_replay"
+    description = ("Replay a genuine record from another context onto this "
+                   "one, keeping the victim's identity.")
+
+    def run(self, adapter: MemoryAdapter):
+        from agmi.attacks.base import AttackResult
+        if not getattr(adapter, "supports_replay", False):
+            return AttackResult(self.name, adapter.name, detected=False,
+                                error="adapter does not model a second context",
+                                version=self.version)
+        return super().run(adapter)
+
+    def tamper(self, adapter: MemoryAdapter) -> None:
+        adapter.seed_other(self.seed_count)
+        donors = adapter.read_other_raw()
+        victims = adapter.read_all_raw()
+        if not donors or not victims:
+            raise RuntimeError("need records in both contexts to replay")
+        adapter.replay_onto(victims[-1].seq, donors[-1])
+
+
+class RollbackReplayAttack(Attack):
+    """T7. Copy an OLDER genuine record of the SAME context over its newest,
+    winding the context back in time. Every record is genuine; only the
+    order is rewritten. AAD that binds a record to its own place does not
+    catch this; catching it needs coverage of the sequence."""
+
+    name = "rollback_replay"
+    description = ("Replay an older genuine record of this context over its "
+                   "newest, rolling state back.")
+
+    def run(self, adapter: MemoryAdapter):
+        from agmi.attacks.base import AttackResult
+        if not getattr(adapter, "supports_replay", False):
+            return AttackResult(self.name, adapter.name, detected=False,
+                                error="adapter does not support replay",
+                                version=self.version)
+        return super().run(adapter)
+
+    def tamper(self, adapter: MemoryAdapter) -> None:
+        records = adapter.read_all_raw()
+        if len(records) < 2:
+            raise RuntimeError("need at least 2 records to roll back")
+        adapter.replay_onto(records[-1].seq, records[0])
+
+
+class MetadataTamperAttack(Attack):
+    """T8. Change a record's metadata (owner, source, role, timestamp) and
+    leave its content untouched. A store that authenticates content but not
+    its labels serves the record with the attacker's metadata, enough to
+    move a record to another user or mark an untrusted source as trusted."""
+
+    name = "metadata_tamper"
+    description = ("Alter a record's owner/source/timestamp without changing "
+                   "its content.")
+
+    def run(self, adapter: MemoryAdapter):
+        from agmi.attacks.base import AttackResult
+        if not getattr(adapter, "supports_metadata", False):
+            return AttackResult(self.name, adapter.name, detected=False,
+                                error="adapter does not expose record metadata",
+                                version=self.version)
+        return super().run(adapter)
+
+    def tamper(self, adapter: MemoryAdapter) -> None:
+        records = adapter.read_all_raw()
+        if not records:
+            raise RuntimeError("no records to tamper metadata on")
+        seq = records[len(records) // 2].seq
+        meta = adapter.read_meta(seq)
+        meta["agmi_meta_tampered"] = True
+        adapter.write_meta(seq, meta)
+
+
 ALL_AT_REST_ATTACKS: list[type[Attack]] = [
     TamperAttack,
     TruncateAttack,
     DeleteMiddleAttack,
     ReorderAttack,
     ForgeAttack,
+    CrossContextReplayAttack,
+    RollbackReplayAttack,
+    MetadataTamperAttack,
 ]

@@ -33,11 +33,15 @@ from pathlib import Path
 from agmi.adapters.base import MemoryAdapter, Record
 
 THREAD = "agmi-thread"
+OTHER_THREAD = "agmi-thread-B"
+OTHER_TOKEN = "agmi-other-"
 SEED_TOKEN = "agmi-seed-"
 
 
 class LangGraphSqliteAdapter(MemoryAdapter):
     name = "langgraph-sqlite"
+    supports_replay = True
+    supports_metadata = True
 
     def __init__(self):
         self._dir: tempfile.TemporaryDirectory | None = None
@@ -175,6 +179,65 @@ class LangGraphSqliteAdapter(MemoryAdapter):
         head, _, tail = tip_id.rpartition("-")
         bumped = format(int(tail, 16) + 1, "012x")
         return f"{head}-{bumped}"
+
+    # --- hooks for T6/T7/T8 -------------------------------------------
+    def seed_other(self, n: int) -> None:
+        from langgraph.checkpoint.base import empty_checkpoint, create_checkpoint
+        cfg = {"configurable": {"thread_id": OTHER_THREAD, "checkpoint_ns": ""}}
+        cp = empty_checkpoint()
+        for i in range(n):
+            cp = create_checkpoint(cp, {"state": f"{OTHER_TOKEN}{i}"}, i)
+            cp["channel_values"] = {"state": f"{OTHER_TOKEN}{i}"}
+            cfg = self._saver.put(cfg, cp, {"source": "loop", "step": i,
+                                            "writes": {}}, {})
+
+    def read_other_raw(self) -> list[Record]:
+        conn = self._raw()
+        rows = conn.execute(
+            "SELECT thread_id, checkpoint_ns, checkpoint_id, "
+            "parent_checkpoint_id, type, checkpoint, metadata "
+            "FROM checkpoints WHERE thread_id = ? ORDER BY checkpoint_id ASC",
+            (OTHER_THREAD,),
+        ).fetchall()
+        conn.close()
+        return [Record(seq=i, fields=dict(zip(self.COLS, r)))
+                for i, r in enumerate(rows)]
+
+    def replay_onto(self, victim_seq: int, donor: Record) -> None:
+        target_id = self._id_at(victim_seq)
+        if target_id is None:
+            raise RuntimeError("no victim row at that position")
+        conn = self._raw()
+        conn.execute(
+            "UPDATE checkpoints SET type=?, checkpoint=?, metadata=? "
+            "WHERE thread_id=? AND checkpoint_id=?",
+            (donor.fields["type"], donor.fields["checkpoint"],
+             donor.fields["metadata"], THREAD, target_id),
+        )
+        conn.commit()
+        conn.close()
+
+    def read_meta(self, seq: int) -> dict:
+        import json
+        recs = self.read_all_raw()
+        raw = recs[seq].fields["metadata"]
+        try:
+            return json.loads(raw) if isinstance(raw, (str, bytes)) else dict(raw)
+        except Exception:  # noqa: BLE001
+            return {"_raw": raw}
+
+    def write_meta(self, seq: int, meta: dict) -> None:
+        import json
+        target_id = self._id_at(seq)
+        if target_id is None:
+            raise RuntimeError("no row at that position")
+        conn = self._raw()
+        conn.execute(
+            "UPDATE checkpoints SET metadata=? WHERE thread_id=? AND checkpoint_id=?",
+            (json.dumps(meta).encode(), THREAD, target_id),
+        )
+        conn.commit()
+        conn.close()
 
     # --- reload + verify (the tool's own integrity answer) -------------
     def reload(self) -> None:

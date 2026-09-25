@@ -111,3 +111,42 @@ class MemoryAdapter(ABC):
         as authentic on inspection."""
         forged = Record(seq=template.seq + 1, fields=dict(template.fields))
         return self.mutate_payload(forged)
+
+    # --- optional hooks for the replay and metadata attacks (T6-T8) ---
+    # T6 (cross-context replay), T7 (rollback replay) and T8 (metadata
+    # tamper) need three things the five basic attacks do not: a SECOND
+    # context (another thread/user/session) to lift a genuine record from,
+    # a way to copy a genuine record's bytes onto another record's slot
+    # keeping that slot's identity, and a way to change a record's metadata
+    # (owner, source, timestamp) without touching its content. Only the
+    # adapter knows how its store expresses these. An adapter that does not
+    # implement them reports the affected cell as "not evaluable", never as
+    # a pass. `supports_replay` and `supports_metadata` say which apply.
+
+    supports_replay: bool = False
+    supports_metadata: bool = False
+
+    def seed_other(self, n: int) -> None:
+        """Seed a SECOND, isolated context in the same store with `n`
+        legitimate entries, each carrying a distinct marker. For T6."""
+        raise NotImplementedError
+
+    def read_other_raw(self) -> list[Record]:
+        """Read the raw records of the second context seeded by seed_other."""
+        raise NotImplementedError
+
+    def replay_onto(self, victim_seq: int, donor: Record) -> None:
+        """Copy the genuine `donor` record's content bytes onto the record
+        at ordinal `victim_seq` in the FIRST context, keeping the victim
+        slot's own identity. Real bytes, wrong place. T6 and T7."""
+        raise NotImplementedError
+
+    def read_meta(self, seq: int) -> dict:
+        """Return the metadata fields of the record at `seq` (owner, source,
+        role, timestamp), separate from its content. For T8."""
+        raise NotImplementedError
+
+    def write_meta(self, seq: int, meta: dict) -> None:
+        """Write metadata fields back to the record at `seq`, leaving its
+        content untouched. For T8."""
+        raise NotImplementedError
