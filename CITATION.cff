@@ -10,6 +10,12 @@ version: 0.6.0
 date-released: 2026-09-25
 identifiers:
   - type: doi
+    value: 10.5281/zenodo.22860886
+    description: "Concept DOI for the software, resolves to the latest version"
+  - type: doi
+    value: 10.5281/zenodo.22957647
+    description: "Software record for v0.6.0"
+  - type: doi
     value: 10.5281/zenodo.22860887
     description: "Software record for v0.5.0"
 license: MIT

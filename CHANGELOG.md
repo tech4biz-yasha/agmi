@@ -3,6 +3,7 @@
 ## Unreleased
 
 ## 0.6.0 (2026-09-25)
+Software record: https://doi.org/10.5281/zenodo.22957647
 - The eight-edit at-rest scorecard. Three storage-level edits join the
   five: T6 cross-context replay (a genuine record from another
   thread/user/session copied over this one, keeping its identity), T7
