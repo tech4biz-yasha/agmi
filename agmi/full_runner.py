@@ -124,9 +124,15 @@ def full_scorecard() -> str:
         # recall ranks lexically at these sizes, so the default row's memory
         # cells need no embedder and run everywhere; receipts do not take
         # part in ranking, so the two receipts rows keep n/a there.
+        from agmi.measure import _inspeximus_defended, _inspeximus_defended_key
+        # The two defended targets from PR #4: the tool's own provenance and a
+        # trust root, keyed on the label and then on an attested key. Memory
+        # cells only; the at-rest path is the default row's.
         inspeximus_rows = [("inspeximus-default", InspeximusDefaultAdapter(), InspeximusRecallAdapter()),
                            ("inspeximus-rcpt+dir", InspeximusRowsSidecarAdapter(), None),
-                           ("inspeximus-rcpt+dir+home", InspeximusRowsSidecarHeadAdapter(), None)]
+                           ("inspeximus-rcpt+dir+home", InspeximusRowsSidecarHeadAdapter(), None),
+                           ("inspeximus-defended", None, _inspeximus_defended("none")),
+                           ("inspeximus-defended-key", None, _inspeximus_defended_key("none"))]
     except ImportError:
         inspeximus_rows = []
     from agmi.adapters.naive_memory import NaiveMemoryAdapter

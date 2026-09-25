@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- Two defended inspeximus rows on the scorecard, from its maintainer's
+  PR #4: the tool's own provenance plus a trust root keyed on the label,
+  and the same filter keyed on a per-user Ed25519 key the writer attests
+  with. Label holds on external only; the key also holds on laundered;
+  agent-laundered lands on both. Both controls from issue #3 are tests.
 - `agmi-check` and a GitHub Action (`action.yml`): one command, one CI
   step, runs the at-rest edits against a single adapter and fails the job
   on any ACCEPTED edit. Labels are T1 to T5 and verdicts are REJECTED,
