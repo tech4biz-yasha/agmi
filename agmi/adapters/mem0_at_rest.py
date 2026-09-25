@@ -41,11 +41,15 @@ from agmi.adapters.mem0_common import (
 from agmi.embedders import HashEmbedder
 
 USER = "victim"
+OTHER_USER = "other"
 SEED_TOKEN = "agmi-seed-"
+OTHER_TOKEN = "agmi-other-"
 
 
 class Mem0AtRestAdapter(MemoryAdapter):
     name = "mem0-qdrant-local"
+    supports_replay = True
+    supports_metadata = True
 
     def __init__(self):
         self._dir: tempfile.TemporaryDirectory | None = None
@@ -131,6 +135,95 @@ class Mem0AtRestAdapter(MemoryAdapter):
         pid = recs[seq].fields["id"]
         conn = sqlite3.connect(self._points_db)
         conn.execute("DELETE FROM points WHERE id = ?", (self._key(pid),))
+        conn.commit()
+        conn.close()
+
+    # --- hooks for T6/T7/T8 -------------------------------------------
+    def _order_for(self, user: str) -> list[str]:
+        conn = sqlite3.connect(history_db(self._root))
+        ids = [r[0] for r in conn.execute(
+            "SELECT h.memory_id FROM history h WHERE h.event = 'ADD' "
+            "ORDER BY h.created_at ASC, h.rowid ASC")]
+        conn.close()
+        # filter to the requested user via each point's payload
+        out = []
+        prows = dict(sqlite3.connect(self._points_db).execute(
+            "SELECT id, point FROM points"))
+        for pid in ids:
+            key = self._key(pid)
+            if key in prows and pickle.loads(prows[key]).payload.get("user_id") == user:
+                out.append(pid)
+        return out
+
+    def seed_other(self, n: int) -> None:
+        """Seed a second user_id in the same store, legitimately."""
+        for i in range(n):
+            self._mem.add(f"{OTHER_TOKEN}{i} other note {i}",
+                          user_id=OTHER_USER, infer=False)
+        # Guard: the two users must be isolated on read, or a cross-user
+        # replay would not be a real crossing. If Mem0 does not filter by
+        # user here, the T6 result is not meaningful.
+        res = self._mem.get_all(filters={"user_id": USER})
+        items = res["results"] if isinstance(res, dict) else res
+        texts = " ".join(it.get("memory", it.get("text", "")) for it in items)
+        if OTHER_TOKEN in texts:
+            raise RuntimeError(
+                "mem0 get_all did not isolate users in this configuration; "
+                "cross-context replay is not measurable here")
+
+    def read_other_raw(self) -> list[Record]:
+        conn = sqlite3.connect(self._points_db)
+        rows = dict(conn.execute("SELECT id, point FROM points"))
+        conn.close()
+        out = []
+        for pid in self._order_for(OTHER_USER):
+            key = self._key(pid)
+            if key not in rows:
+                continue
+            point = pickle.loads(rows[key])
+            out.append(Record(seq=len(out), fields={
+                "id": pid, "text": point.payload.get("data", ""),
+                "point": point}))
+        return out
+
+    def replay_onto(self, victim_seq: int, donor: Record) -> None:
+        """Copy the donor point's genuine payload text onto the victim
+        point, keeping the victim point's id and its user_id."""
+        recs = self.read_all_raw()
+        if victim_seq >= len(recs):
+            raise RuntimeError("no victim point at that position")
+        victim = recs[victim_seq].fields
+        point = victim["point"]
+        point.payload["data"] = donor.fields["text"]
+        point.payload["text_lemmatized"] = donor.fields["text"]
+        conn = sqlite3.connect(self._points_db)
+        conn.execute("INSERT INTO points (id, point) VALUES (?, ?) "
+                     "ON CONFLICT(id) DO UPDATE SET point = excluded.point",
+                     (self._key(victim["id"]), pickle.dumps(point)))
+        conn.commit()
+        conn.close()
+
+    def read_meta(self, seq: int) -> dict:
+        recs = self.read_all_raw()
+        p = recs[seq].fields["point"]
+        return {"user_id": p.payload.get("user_id"),
+                "hash": p.payload.get("hash"),
+                "created_at": p.payload.get("created_at"),
+                "updated_at": p.payload.get("updated_at")}
+
+    def write_meta(self, seq: int, meta: dict) -> None:
+        recs = self.read_all_raw()
+        if seq >= len(recs):
+            raise RuntimeError("no point at that position")
+        f = recs[seq].fields
+        point = f["point"]
+        # Reassign the memory to another user, content untouched.
+        point.payload["user_id"] = OTHER_USER
+        point.payload["agmi_meta_tampered"] = True
+        conn = sqlite3.connect(self._points_db)
+        conn.execute("INSERT INTO points (id, point) VALUES (?, ?) "
+                     "ON CONFLICT(id) DO UPDATE SET point = excluded.point",
+                     (self._key(f["id"]), pickle.dumps(point)))
         conn.commit()
         conn.close()
 

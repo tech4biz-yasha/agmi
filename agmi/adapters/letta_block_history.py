@@ -44,6 +44,7 @@ import psycopg2
 from agmi.adapters.base import MemoryAdapter, Record
 
 SEED_TOKEN = "agmi-seed-"
+OTHER_TOKEN = "agmi-other-"
 # Letta's ORM joins across many tables even for a simple block read, so the
 # whole schema is created. It is dropped again on teardown.
 
@@ -84,11 +85,14 @@ def _ensure_env() -> str:
 
 class LettaBlockHistoryAdapter(MemoryAdapter):
     name = "letta-block-history"
+    supports_replay = True
+    supports_metadata = True
 
     def __init__(self):
         self._uri: str | None = None
         self._actor = None
         self._block_id: str | None = None
+        self._other_block_id: str | None = None
         self._tables = None
 
     # --- lifecycle -----------------------------------------------------
@@ -223,6 +227,81 @@ class LettaBlockHistoryAdapter(MemoryAdapter):
             self._repoint(cur, tail["id"] if tail else None,
                           tail["value"] if tail else None)
         cur.execute("DELETE FROM block_history WHERE id = %s", (victim,))
+        conn.commit()
+        conn.close()
+
+    # --- hooks for T6/T7/T8 -------------------------------------------
+    def seed_other(self, n: int) -> None:
+        """Seed a SECOND block (another block_id) the same legitimate way,
+        so its history rows are genuine and can be replayed onto the first."""
+        from letta.schemas.block import Block, BlockUpdate
+        from letta.services.block_manager import BlockManager
+
+        async def _seed():
+            bm = BlockManager()
+            blk = await bm.create_or_update_block_async(
+                Block(label="persona", value=f"{OTHER_TOKEN}0"), actor=self._actor)
+            blk = await bm.checkpoint_block_async(blk.id, actor=self._actor)
+            for i in range(1, n):
+                await bm.update_block_async(
+                    blk.id, BlockUpdate(value=f"{OTHER_TOKEN}{i}"),
+                    actor=self._actor)
+                blk = await bm.checkpoint_block_async(blk.id, actor=self._actor)
+            return blk.id
+
+        self._other_block_id = asyncio.run(_seed())
+
+    def read_other_raw(self) -> list[Record]:
+        conn = self._raw()
+        cur = conn.cursor()
+        cur.execute(
+            'SELECT id, block_id, sequence_number, value, label, "limit", '
+            "actor_type, actor_id, organization_id FROM block_history "
+            "WHERE block_id = %s ORDER BY sequence_number ASC",
+            (self._other_block_id,),
+        )
+        rows = cur.fetchall()
+        conn.close()
+        return [Record(seq=i, fields=dict(zip(self.COLS, r)))
+                for i, r in enumerate(rows)]
+
+    def replay_onto(self, victim_seq: int, donor: Record) -> None:
+        """Copy the donor history row's genuine value onto the victim row in
+        the first block, keeping the victim row's id/block_id/sequence. If
+        the block currently sits on the victim row, its live value follows,
+        which is what undo/redo would load."""
+        recs = self.read_all_raw()
+        if victim_seq >= len(recs):
+            raise RuntimeError("no victim row at that position")
+        target = recs[victim_seq].fields["id"]
+        conn = self._raw()
+        cur = conn.cursor()
+        cur.execute("UPDATE block_history SET value = %s WHERE id = %s",
+                    (donor.fields["value"], target))
+        cur.execute("SELECT current_history_entry_id FROM block WHERE id = %s",
+                    (self._block_id,))
+        if cur.fetchone()[0] == target:
+            cur.execute("UPDATE block SET value = %s WHERE id = %s",
+                        (donor.fields["value"], self._block_id))
+        conn.commit()
+        conn.close()
+
+    def read_meta(self, seq: int) -> dict:
+        recs = self.read_all_raw()
+        f = recs[seq].fields
+        return {"actor_id": f["actor_id"], "actor_type": f["actor_type"],
+                "organization_id": f["organization_id"], "label": f["label"]}
+
+    def write_meta(self, seq: int, meta: dict) -> None:
+        recs = self.read_all_raw()
+        if seq >= len(recs):
+            raise RuntimeError("no row at that position")
+        target = recs[seq].fields["id"]
+        conn = self._raw()
+        cur = conn.cursor()
+        # Reassign the checkpoint to a different actor, content untouched.
+        cur.execute("UPDATE block_history SET actor_id = %s WHERE id = %s",
+                    (str(meta.get("actor_id", "")) + "-agmi", target))
         conn.commit()
         conn.close()
 
