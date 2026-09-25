@@ -10,8 +10,8 @@ on:
 jobs:
   langgraph:
     # The action must run end to end and must fail on a store that accepts
-    # edits. LangGraph's SqliteSaver accepts all five, so the run is expected
-    # to fail; continue-on-error turns that into the passing case below.
+    # edits. LangGraph's SqliteSaver accepts all eight, so the run is
+    # expected to fail; continue-on-error turns that into the passing case.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -27,12 +27,34 @@ jobs:
           echo "expected the action to fail on LangGraph SqliteSaver"
           exit 1
 
-  inspeximus-receipts:
-    # Receipts on: every edit is REPORTED, so the action must pass.
+  reference-atrest:
+    # The self-validating reference store catches all eight edits by
+    # construction, so the action must pass here. This is the positive case:
+    # it proves the action can report a clean store as clean.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: ./
         with:
+          adapter: agmi.adapters.reference_atrest:ReferenceAtRestAdapter
+
+  inspeximus-receipts:
+    # Receipts on: seven of eight edits are REPORTED, but cross-context
+    # replay (T6) is ACCEPTED because a receipt binds text and key, not the
+    # owning user. So the action is expected to fail here on exactly that
+    # cell. If this job ever passes, inspeximus has closed the T6 gap and the
+    # scorecard row needs re-measuring.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - id: run
+        uses: ./
+        continue-on-error: true
+        with:
           adapter: agmi.adapters.inspeximus_rows:InspeximusRowsSidecarAdapter
           extras: inspeximus
+      - name: The action failed on the T6 gap, as measured
+        if: steps.run.outcome != 'failure'
+        run: |
+          echo "inspeximus receipts passed all eight; the T6 finding no longer holds, re-measure"
+          exit 1
