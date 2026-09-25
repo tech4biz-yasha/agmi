@@ -31,8 +31,14 @@ MEASURED_ON = "letta 0.16.8"
 
 
 def test_letta_block_history_accepts_every_at_rest_tamper():
+    # T6/T7/T8 (cross-context replay, rollback, metadata) need adapter
+    # hooks this store does not implement yet; they report n/a here and are
+    # measured on the stores that have those surfaces. The rest must be
+    # ACCEPTED, the finding this row records.
     for cls in ALL_AT_REST_ATTACKS:
         r = cls().run(LettaBlockHistoryAdapter())
+        if r.status == "n/a":
+            continue
         assert r.error is None, f"{r.attack} errored: {r.error}"
         assert not r.detected, (
             f"{r.attack}: Letta now detects this. Re-measure and update the "

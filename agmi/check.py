@@ -35,6 +35,9 @@ LABELS = {
     "delete_middle": "T3 middle deletion",
     "reorder": "T4 reordering",
     "forge": "T5 forged insertion",
+    "cross_replay": "T6 cross-context replay",
+    "rollback_replay": "T7 rollback replay",
+    "metadata_tamper": "T8 metadata tamper",
 }
 
 

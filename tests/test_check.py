@@ -20,9 +20,13 @@ def test_openfang_model_accepts_truncation_and_fails_the_job(tmp_path):
     data = json.loads(out.read_text())
     assert data["tool"] == "openfang"
     edits = {r["edit"][:2]: r["verdict"] for r in data["edits"]}
-    assert list(edits) == ["T1", "T2", "T3", "T4", "T5"]
+    assert list(edits) == ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"]
     assert edits["T2"] == "ACCEPTED"
     assert edits["T1"] == "REJECTED"
+    # OpenFang is a model/hash-chain adapter with no second context or
+    # metadata layer, so the storage-level edits report not evaluable.
+    assert edits["T6"] == "NOT EVALUABLE"
+    assert edits["T8"] == "NOT EVALUABLE"
 
 
 def test_fail_on_none_never_fails():
