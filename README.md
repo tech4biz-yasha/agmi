@@ -25,18 +25,22 @@ A conformance test suite that measures whether AI agent memory and checkpoint st
 
 Three of the most used agent memory layers were seeded through their own APIs, edited behind their backs, and asked to read their memory again. None of them noticed.
 
-| Target | Version | tamper | truncate | delete_middle | reorder | forge |
-|---|---|:-:|:-:|:-:|:-:|:-:|
-| LangGraph `SqliteSaver` | langgraph-checkpoint-sqlite 3.1.1 | accepted | accepted | accepted | accepted | accepted |
-| Letta core memory checkpoint history | letta 0.16.8 | accepted | accepted | accepted | accepted | accepted |
-| Mem0 local Qdrant store | mem0ai 2.0.20 | accepted | accepted | accepted | accepted | accepted |
-| inspeximus, receipts off (default), read path | inspeximus 2.38.0 | accepted | accepted | accepted | accepted | accepted |
-| inspeximus, receipts on with a key, attacker holds the store's directory | inspeximus 2.38.0 | reported | reported | reported | reported | reported |
-| inspeximus, receipts on with a key, attacker also holds the user's config home | inspeximus 2.38.0 | reported | accepted | reported | reported | reported |
+The eight edits are the ones proposed as the test method for IETF draft-han-bmwg-agent-security-benchmark metric 5.4.7: T1 content tamper, T2 tail truncation, T3 middle deletion, T4 reordering, T5 forged insertion, T6 cross-context replay, T7 rollback replay, T8 metadata tamper. T6 and T7 use only bytes the store itself wrote, in the wrong place; they are the edits that separate encryption from integrity.
 
-The runner prints the same words as these tables (accepted, detected, reported; surfaced, kept out). The tests pin the underlying status values (`safe`, `VULNERABLE`, `n/a`), so a wording change can never move a cell.
+| Target | Version | T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| LangGraph `SqliteSaver` | langgraph-checkpoint-sqlite 3.1.1 | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
+| Letta core memory checkpoint history | letta 0.16.8 | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
+| Mem0 local Qdrant store | mem0ai 2.0.20 | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
+| inspeximus, receipts off (default), read path | inspeximus 3.0.0 | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
+| inspeximus, receipts on with a key, attacker holds the store's directory | inspeximus 3.0.0 | reported | reported | reported | reported | reported | accepted | reported | reported |
+| inspeximus, receipts on with a key, attacker also holds the user's config home | inspeximus 3.0.0 | reported | accepted | reported | reported | reported | accepted | reported | reported |
 
-"Accepted" means the tool loaded the altered store, raised nothing, and the agent carried on from the altered memory as if it were true. "Reported" means the tool's own integrity check named the problem after a reload, and only that. After any of the five attacks the store still loads and the read path (`recall()` for inspeximus) answers from the altered store, so a reported cell says a separate audit call (`verify_writes()` in the inspeximus rows) caught it, not that the agent was protected at read time. `full_runner` names the detection point in a checkedAt column: "read" when verify() is the read path, "audit" when it is a call the operator has to make. This table has no such column; every reported cell in it is an audit detection. Every row is a measurement of the real library at the version shown, reproducible in under a minute, and pinned by a test that fails the day that library adds a check.
+One cell in the receipts rows is new and worth a sentence: a receipt binds a record's text and key, but not the user it belongs to, so a genuine signed record lifted from another user's context (T6) still passes the audit. Rollback (T7) and metadata edits (T8) are caught. That is the same shape as the LangGraph encrypted-checkpointer finding in langchain-ai/langgraph#9004, in a second, independent tool.
+
+The runner prints the same words as these tables (accepted, rejected, reported; surfaced, kept out), the at-rest words following the method proposed for IETF draft-han-bmwg-agent-security-benchmark 5.4.7. The tests pin the underlying status values (`safe`, `VULNERABLE`, `n/a`), so a wording change can never move a cell.
+
+"Accepted" means the tool loaded the altered store, raised nothing, and the agent carried on from the altered memory as if it were true. "Rejected" means the tool refused the edit at read time. "Reported" means the tool's own integrity check named the problem after a reload, and only that. After any of the five attacks the store still loads and the read path (`recall()` for inspeximus) answers from the altered store, so a reported cell says a separate audit call (`verify_writes()` in the inspeximus rows) caught it, not that the agent was protected at read time. `full_runner` names the detection point in a checkedAt column: "read" when verify() is the read path, "audit" when it is a call the operator has to make. This table has no such column; every reported cell in it is an audit detection. Every row is a measurement of the real library at the version shown, reproducible in under a minute, and pinned by a test that fails the day that library adds a check.
 
 This is a design gap, not a bug. LangGraph, Letta and Mem0 do not claim their stores are tamper evident. inspeximus makes that claim for its receipts mode, and the table shows what that buys and where it stops. The point of agmi is that nobody had measured the gap with one yardstick, and that the gap matters the moment agent memory is used as a record.
 
@@ -179,10 +183,10 @@ sequenceDiagram
     R->>Ad: verify()
     Ad->>Tool: get() / list() / search() / undo()
     Tool-->>Ad: loaded fine, or raised
-    Ad-->>R: True = accepted, False = detected
+    Ad-->>R: True = accepted, False = rejected
 ```
 
-The pass/fail rule is deliberately narrow. A tool is **detected** only if it raises, refuses or reports the problem itself on reload. A tool that loads the altered store and answers normally is **accepted**. We never infer detection from the content coming back different, because the tool did not say anything.
+The pass/fail rule is deliberately narrow. A tool is **rejected** (or **reported**, for an audit-time check) only if it raises, refuses or reports the problem itself on reload. A tool that loads the altered store and answers normally is **accepted**. We never infer detection from the content coming back different, because the tool did not say anything.
 
 ## Architecture
 
@@ -241,7 +245,7 @@ Folder map:
 ```
 agmi/
   attacks/
-    base.py                 Attack contract and AttackResult (detected / accepted / n/a / error)
+    base.py                 Attack contract and AttackResult (detected flag: rejected or reported / accepted / n/a / error)
     at_rest.py              The five at-rest attacks, written once for every adapter
     memory_specific.py      The four retrieval attacks for user-scoped semantic memory
   adapters/
@@ -273,7 +277,7 @@ tests/                      One pinned test module per real target
 
 Each attack has one precise rule. There are no heuristics and no scoring thresholds in the at-rest set.
 
-| Attack | What the attacker does to the store | Detected means | Why it matters |
+| Attack | What the attacker does to the store | Rejected means | Why it matters |
 |---|---|---|---|
 | `tamper` | Changes the content of one entry in the middle, without breaking its encoding | Tool refuses or flags the entry on reload | Silent rewriting of a past memory or decision |
 | `truncate` | Deletes the newest two entries | Tool notices the chain ends early | Rolling an agent back to an older state and erasing recent actions from the record |
@@ -305,7 +309,7 @@ The `reference-defended(model)` row is the smallest store that verifies signatur
 
 Positive control before every verdict. The victim reads back a genuine memory they wrote, with an on-topic question, in the same store state. A fixture that serves nothing there yields no verdict, and a cell with any such fixture is `n/a`, never `safe`, because an empty answer would otherwise satisfy "not surfaced", "not leaked" and "not delivered". The inspeximus maintainer found this in issue #3: `trusted_only` with no trust seeds fails closed and read as safe on all four; it now scores `n/a` on all four, pinned by a test.
 
-Every attack carries a version (`memory_injection@v2`, `retrieval_hijack@v3`, and so on), printed by the runner and recorded in each result, so cells from different reports are never compared as if the attack had stood still. The at-rest attacks also run a second control: a reload with no edit must still verify, or the cell is `n/a`; without it a tool that cannot reopen its own store would score "detected" on every edit. When a verdict is `detected`, the cell's detail carries the tool's own reason (the exception it raised, or which check failed), so a deliberate refusal can be told from a crash.
+Every attack carries a version (`memory_injection@v2`, `retrieval_hijack@v3`, and so on), printed by the runner and recorded in each result, so cells from different reports are never compared as if the attack had stood still. The at-rest attacks also run a second control: a reload with no edit must still verify, or the cell is `n/a`; without it a tool that cannot reopen its own store would score "rejected" on every edit. When a verdict is `rejected` or `reported`, the cell's detail carries the tool's own reason (the exception it raised, or which check failed), so a deliberate refusal can be told from a crash.
 | `indirect_prompt_injection` | Does instruction-shaped stored content get delivered into retrieved context? |
 
 `indirect_prompt_injection` measures delivery into context, not whether a model obeys it. A portable suite cannot drive every tool's live model; delivery is the property the tool owns.
@@ -476,7 +480,7 @@ class MyToolAdapter(MemoryAdapter):
 Rules that keep a row honest:
 
 1. Seed and verify through the tool's public API, never through the raw store.
-2. `verify()` reports what the tool says. Do not compare content and call a difference "detected".
+2. `verify()` reports what the tool says. Do not compare content and call a difference "rejected".
 3. Pin the version in a test, as `tests/test_langgraph_sqlite.py` does.
 4. If the target needs a hosted model or an API key to run, nobody can reproduce it; find an offline path or mark the cell `n/a` with a reason.
 5. Label anything that is not the real library `(model)`.

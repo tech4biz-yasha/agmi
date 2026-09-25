@@ -41,27 +41,27 @@
       "cells": {
         "tamper": {
           "status": "safe",
-          "verdict": "detected",
+          "verdict": "rejected",
           "detail": "detected on reload (hash mismatch at seq 2)"
         },
         "truncate": {
           "status": "safe",
-          "verdict": "detected",
+          "verdict": "rejected",
           "detail": "detected on reload (walked tip differs from persisted tip)"
         },
         "delete_middle": {
           "status": "safe",
-          "verdict": "detected",
+          "verdict": "rejected",
           "detail": "detected on reload (chain break at seq 3)"
         },
         "reorder": {
           "status": "safe",
-          "verdict": "detected",
+          "verdict": "rejected",
           "detail": "detected on reload (chain break at seq 1)"
         },
         "forge": {
           "status": "safe",
-          "verdict": "detected",
+          "verdict": "rejected",
           "detail": "detected on reload (chain break at seq 5)"
         },
         "cross_replay": {
@@ -246,7 +246,7 @@
         "retrieval_hijack": {
           "status": "VULNERABLE",
           "verdict": "surfaced",
-          "detail": "attacker entry took a slot from a genuine memory (external: 5 of 5, ranks 2, 3, 1, 2, 1 of 3; laundered: 4 of 5, ranks 2, out, 1, 2, 1 of 3; agent-laundered: 4 of 5, ranks 2, out, 1, 2, 2 of 3)"
+          "detail": "attacker entry took a slot from a genuine memory (external: 5 of 5, ranks 2, 3, 1, 2, 2 of 3; laundered: 4 of 5, ranks 2, out, 1, 2, 2 of 3; agent-laundered: 5 of 5, ranks 2, 3, 1, 2, 2 of 3)"
         },
         "indirect_prompt_injection": {
           "status": "VULNERABLE",
@@ -581,7 +581,7 @@
         "tamper": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory 798d84141d: its TEXT or KEY no longer matches its write receipt (edited after write)'])"
+          "detail": "detected on reload (verify_writes: ['memory bf322a3f8b: its TEXT or KEY no longer matches its write receipt (edited after write)'])"
         },
         "truncate": {
           "status": "reported",
@@ -596,12 +596,12 @@
         "reorder": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory e5a40cb7c6: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
+          "detail": "detected on reload (verify_writes: ['memory 350e799132: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
         },
         "forge": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: [\"1 record(s) are covered by NO write receipt, so nothing here vouches for them: ['f06824fd66']. They were inserted out of band, or written )"
+          "detail": "detected on reload (verify_writes: [\"1 record(s) are covered by NO write receipt, so nothing here vouches for them: ['f01606b653']. They were inserted out of band, or written )"
         },
         "cross_replay": {
           "status": "VULNERABLE",
@@ -611,12 +611,12 @@
         "rollback_replay": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory eaee50e277: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
+          "detail": "detected on reload (verify_writes: ['memory 747adf1f06: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
         },
         "metadata_tamper": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory d0e55f5052: a field its receipt commits to no longer matches its write receipt (edited after write)'])"
+          "detail": "detected on reload (verify_writes: ['memory 53b44297e0: a field its receipt commits to no longer matches its write receipt (edited after write)'])"
         },
         "memory_injection": {
           "status": "n/a",
@@ -658,7 +658,7 @@
         "tamper": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory 20d07015b7: its TEXT or KEY no longer matches its write receipt (edited after write)'])"
+          "detail": "detected on reload (verify_writes: ['memory 3550cceebc: its TEXT or KEY no longer matches its write receipt (edited after write)'])"
         },
         "truncate": {
           "status": "VULNERABLE",
@@ -673,12 +673,12 @@
         "reorder": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory 8b99bb7bd0: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
+          "detail": "detected on reload (verify_writes: ['memory f04b803f9f: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
         },
         "forge": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: [\"1 record(s) are covered by NO write receipt, so nothing here vouches for them: ['f03d5e2024']. They were inserted out of band, or written )"
+          "detail": "detected on reload (verify_writes: [\"1 record(s) are covered by NO write receipt, so nothing here vouches for them: ['f0ea1944cb']. They were inserted out of band, or written )"
         },
         "cross_replay": {
           "status": "VULNERABLE",
@@ -688,12 +688,12 @@
         "rollback_replay": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory 5004ef5ad2: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
+          "detail": "detected on reload (verify_writes: ['memory 4771d10791: its TEXT or KEY; its VALUE (`object`); WHEN the fact became true (`valid_from`), or where that time came from no longer)"
         },
         "metadata_tamper": {
           "status": "reported",
           "verdict": "reported",
-          "detail": "detected on reload (verify_writes: ['memory c5cbc13b5d: a field its receipt commits to no longer matches its write receipt (edited after write)'])"
+          "detail": "detected on reload (verify_writes: ['memory 324d26ce01: a field its receipt commits to no longer matches its write receipt (edited after write)'])"
         },
         "memory_injection": {
           "status": "n/a",
