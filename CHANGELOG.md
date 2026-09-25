@@ -3,6 +3,7 @@
 ## Unreleased (0.6.1)
 
 - New at-rest row: OpenAI Agents SDK `SQLiteSession` (openai-agents 0.20.0). Accepts all eight edits T1 to T8. Adapter `agmi/adapters/openai_agents_session.py`, pinned tests `tests/test_openai_agents_session.py`, extra `openai-agents`.
+- New at-rest row: LlamaIndex `Memory` on its SQLAlchemy chat store (llama-index-core 0.14.24). Accepts all eight edits. Adapter `agmi/adapters/llamaindex_memory.py`, pinned tests `tests/test_llamaindex_memory.py`, extra `llamaindex`.
 - Site: design guide, per-edit explainers with live rows, memory agent page, animated diagrams, proposed conformance levels.
 
 ## Unreleased

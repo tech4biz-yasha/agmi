@@ -431,7 +431,7 @@ def build():
     global d_date, d_platform
     d, rows = load()
     d_date, d_platform = d["date"], d["platform"]
-    at_rest_keys = [k for k in ["openfang(model,fixed)", "langgraph-sqlite", "openai-agents-sqlite-session", "letta-block-history",
+    at_rest_keys = [k for k in ["openfang(model,fixed)", "langgraph-sqlite", "openai-agents-sqlite-session", "llamaindex-memory-sqlite", "letta-block-history",
                                 "mem0-qdrant-local", "inspeximus-default", "inspeximus-rcpt+dir",
                                 "inspeximus-rcpt+dir+home"] if k in rows]
     fd_keys = [k for k in ["langgraph-sqlite-store", "letta-archival", "mem0-qdrant-local",
@@ -441,7 +441,7 @@ def build():
     fd_cols = [(a, n, n) for a, n, _, _ in FRONT_DOOR]
 
     # count the headline
-    all8 = [k for k in ["langgraph-sqlite", "openai-agents-sqlite-session", "letta-block-history", "mem0-qdrant-local", "inspeximus-default"]
+    all8 = [k for k in ["langgraph-sqlite", "openai-agents-sqlite-session", "llamaindex-memory-sqlite", "letta-block-history", "mem0-qdrant-local", "inspeximus-default"]
             if k in rows and all(rows[k]["cells"][a]["verdict"] == "accepted" for a, *_ in AT_REST)]
 
     OUT.mkdir(parents=True, exist_ok=True)

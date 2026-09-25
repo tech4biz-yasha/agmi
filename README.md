@@ -341,6 +341,18 @@ There is no integrity logic on the store. The only thing that can fail on reload
 
 The session store has no integrity logic. `get_items()` decodes each row's JSON and silently skips a row that does not decode, so even a corrupted row does not raise; a tamper that keeps the JSON valid is served as the agent's own history. T6 copies user B's item over user A's row keeping A's `session_id`, and A's next run is fed B's text. T8 rewrites the row's `session_id`, which moves an item to another user's history. The only metadata the store keeps is `session_id` and `created_at`.
 
+### LlamaIndex `Memory` (SQLAlchemy chat store)
+
+| | |
+|---|---|
+| Measured on | llama-index-core 0.14.24, SQLite via aiosqlite, macOS arm64, Python 3.12 |
+| What is targeted | The `llama_index_memory` table: one row per message, JSON `data`, owner in `key`, `status` active or archived, order by `id` |
+| Seeded through | `Memory.aput_messages()` |
+| Read back through | `Memory.aget()`, which builds the context the agent runs on |
+| verify() | True if `aget()` returns without raising |
+
+No integrity logic on the store. Every row is a plain JSON message with its owner, role and status as ordinary columns, so all eight edits are served as genuine on the next `aget()`. T6 copies user B's row over user A's keeping A's `key`; T8 rewrites `key`, `role` or `status`, which moves a message to another session, changes who said it, or archives it out of context.
+
 ### LangGraph long-term store (`SqliteStore`)
 
 LangGraph has two persistence components and they get two rows. The checkpointer above saves and resumes a graph's state and does not search. The store, `SqliteStore` from the same `langgraph-checkpoint-sqlite` package, is the long-term memory an agent writes facts into and searches by meaning, so it is the surface for the memory-specific attacks.

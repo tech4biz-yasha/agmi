@@ -8,6 +8,7 @@ Method text proposed for IETF draft-han-bmwg-agent-security-benchmark metric 5.4
 - OpenFang model, tip-persistence fix (reference model of a hash chain): T1 rejected, T2 rejected, T3 rejected, T4 rejected, T5 rejected, T6 n/a, T7 n/a, T8 n/a
 - LangGraph SqliteSaver (langgraph-checkpoint-sqlite 3.1.1): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
 - OpenAI Agents SDK SQLiteSession (openai-agents 0.20.0): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
+- llamaindex-memory-sqlite (): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
 - Letta block checkpoint history (letta 0.16.8): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
 - Mem0 local Qdrant store (mem0ai 2.0.20): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
 - inspeximus, receipts off (default) (inspeximus 3.0.0): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted

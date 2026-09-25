@@ -111,6 +111,11 @@ def full_scorecard() -> str:
         openai_session = OpenAIAgentsSessionAdapter()
     except ImportError:
         openai_session = None
+    try:
+        from agmi.adapters.llamaindex_memory import LlamaIndexMemoryAdapter
+        llamaindex_memory = LlamaIndexMemoryAdapter()
+    except ImportError:
+        llamaindex_memory = None
     lg_store = _langgraph_store_semantic()
     letta_archival = _letta_archival_semantic()
     try:
@@ -156,6 +161,7 @@ def full_scorecard() -> str:
         ("openfang(model,fixed)", OpenFangAdapter(strict_tip=True), None),
         ("langgraph-sqlite", LangGraphSqliteAdapter(), None),
         *([("openai-agents-sqlite-session", openai_session, None)] if openai_session else []),
+        *([("llamaindex-memory-sqlite", llamaindex_memory, None)] if llamaindex_memory else []),
         *([("langgraph-sqlite-store", None, lg_store)] if lg_store else []),
         *([letta_row] if letta_row else []),
         *([("letta-archival", None, letta_archival)] if letta_archival else []),
