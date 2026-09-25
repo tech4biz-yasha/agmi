@@ -20,9 +20,12 @@ verify() returns True when a fresh `Memory` on the same file returns from
 `aget()` without raising, and False only when the library itself raises.
 
 T8 metadata: `key` (owner session), `timestamp`, `role` and `status` are
-the row's metadata. write_meta() applies a changed key, role or status
-directly; any other change is applied as a rewritten timestamp, so the
-edit is real on disk.
+the row's columns besides `data`. The generic T8 edit adds a key no column
+can hold, so write_meta() applies it as a rewritten `timestamp`: that is
+what the T8 cell measures. A changed `key` (move to another session) and
+`status` (archived, dropped from context) are measured separately in the
+pinned tests. The `role` column is not read by `aget()`, which takes the
+role from inside `data`.
 """
 from __future__ import annotations
 

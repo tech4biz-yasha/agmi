@@ -339,7 +339,7 @@ There is no integrity logic on the store. The only thing that can fail on reload
 | Read back through | `SQLiteSession.get_items()`, which is what the SDK feeds the model on the next run |
 | verify() | True if `get_items()` returns without raising |
 
-The session store has no integrity logic. `get_items()` decodes each row's JSON and silently skips a row that does not decode, so even a corrupted row does not raise; a tamper that keeps the JSON valid is served as the agent's own history. T6 copies user B's item over user A's row keeping A's `session_id`, and A's next run is fed B's text. T8 rewrites the row's `session_id`, which moves an item to another user's history. The only metadata the store keeps is `session_id` and `created_at`.
+The session store has no integrity logic. `get_items()` decodes each row's JSON and silently skips a row that does not decode, so even a corrupted row does not raise; a tamper that keeps the JSON valid is served as the agent's own history. T6 copies user B's item over user A's row keeping A's `session_id`, and A's next run is fed B's text. The only metadata the store keeps is `session_id` and `created_at`; the T8 cell rewrites `created_at` and leaves the text untouched. Measured separately and pinned in the tests: rewriting a row's `session_id` moves that item into another user's history, and `get_items()` still raises nothing.
 
 ### LlamaIndex `Memory` (SQLAlchemy chat store)
 
@@ -351,7 +351,7 @@ The session store has no integrity logic. `get_items()` decodes each row's JSON 
 | Read back through | `Memory.aget()`, which builds the context the agent runs on |
 | verify() | True if `aget()` returns without raising |
 
-No integrity logic on the store. Every row is a plain JSON message with its owner, role and status as ordinary columns, so all eight edits are served as genuine on the next `aget()`. T6 copies user B's row over user A's keeping A's `key`; T8 rewrites `key`, `role` or `status`, which moves a message to another session, changes who said it, or archives it out of context.
+No integrity logic on the store. Every row is a plain JSON message with its owner, role and status as ordinary columns, so all eight edits are served as genuine on the next `aget()`. T6 copies user B's row over user A's keeping A's `key`. The T8 cell rewrites the row's `timestamp` and leaves the text untouched. Measured separately and pinned in the tests: rewriting `key` moves a message into another session's context, and setting `status` to archived silently drops it from context; neither raises. The `role` column is not what `aget()` reads (the role inside the JSON is), so changing it has no effect and is not claimed.
 
 ### LangGraph long-term store (`SqliteStore`)
 

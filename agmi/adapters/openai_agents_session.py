@@ -25,10 +25,10 @@ still present, and False only when the SDK itself raises. That is the
 tool's honest answer, not ours.
 
 T8 metadata: the only per-record metadata the store keeps is `session_id`
-(who owns the row) and `created_at`. There is no column for anything else,
-so write_meta() maps any change to those two: a changed `session_id` moves
-the record to another user, and any other change is applied as a rewritten
-`created_at`. Either way the row's metadata really changes on disk.
+(who owns the row) and `created_at`. The generic T8 edit adds a key no
+column can hold, so write_meta() applies it as a rewritten `created_at`:
+that is what the T8 cell measures. A changed `session_id` (moving the row
+to another user) is measured separately in the pinned tests.
 """
 from __future__ import annotations
 

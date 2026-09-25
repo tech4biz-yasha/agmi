@@ -83,3 +83,37 @@ def test_cross_replay_serves_other_users_text_as_own():
         assert OTHER_SESSION != SESSION
     finally:
         a.teardown()
+
+
+def test_t8_cell_rewrites_created_at_only():
+    """The T8 cell on this store is a created_at rewrite, text untouched."""
+    from agmi.attacks.at_rest import MetadataTamperAttack
+    a = OpenAIAgentsSessionAdapter()
+    a.setup()
+    try:
+        a.seed(5)
+        before = [dict(r.fields) for r in a.read_all_raw()]
+        MetadataTamperAttack().tamper(a)
+        after = [dict(r.fields) for r in a.read_all_raw()]
+        changed = {k for b, x in zip(before, after) for k in b if b[k] != x[k]}
+        assert changed == {"created_at"}
+    finally:
+        a.teardown()
+
+
+def test_rewritten_session_id_moves_item_to_other_user():
+    import asyncio
+    from agents import SQLiteSession
+    a = OpenAIAgentsSessionAdapter()
+    a.setup()
+    try:
+        a.seed(5)
+        a.seed_other(5)
+        a.write_meta(2, {"session_id": OTHER_SESSION})
+        s = SQLiteSession(OTHER_SESSION, str(a._db))
+        items = asyncio.run(s.get_items())
+        s.close()
+        assert any(i["content"] == "agmi-seed-2" for i in items)
+        assert a.verify() is True
+    finally:
+        a.teardown()

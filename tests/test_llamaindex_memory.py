@@ -80,3 +80,62 @@ def test_cross_replay_serves_other_users_text_as_own():
         assert OTHER_SESSION != SESSION
     finally:
         a.teardown()
+
+
+def test_t8_cell_rewrites_timestamp_only():
+    from agmi.attacks.at_rest import MetadataTamperAttack
+    a = LlamaIndexMemoryAdapter()
+    a.setup()
+    try:
+        a.seed(5)
+        before = [dict(r.fields) for r in a.read_all_raw()]
+        MetadataTamperAttack().tamper(a)
+        after = [dict(r.fields) for r in a.read_all_raw()]
+        changed = {k for b, x in zip(before, after) for k in b if b[k] != x[k]}
+        assert changed == {"timestamp"}
+    finally:
+        a.teardown()
+
+
+def test_rewritten_key_moves_message_to_other_session():
+    import asyncio
+    a = LlamaIndexMemoryAdapter()
+    a.setup()
+    try:
+        a.seed(5)
+        a.seed_other(5)
+        a.write_meta(2, {"key": OTHER_SESSION})
+        msgs = asyncio.run(a._memory(OTHER_SESSION).aget())
+        assert any(m.content == "agmi-seed-2" for m in msgs)
+        assert a.verify() is True
+    finally:
+        a.teardown()
+
+
+def test_archived_status_silently_drops_message_from_context():
+    import asyncio
+    a = LlamaIndexMemoryAdapter()
+    a.setup()
+    try:
+        a.seed(5)
+        a.write_meta(3, {"status": "archived"})
+        msgs = asyncio.run(a._memory(SESSION).aget())
+        assert not any(m.content == "agmi-seed-3" for m in msgs)
+        assert len(msgs) == 4
+        assert a.verify() is True
+    finally:
+        a.teardown()
+
+
+def test_role_column_is_not_what_aget_reads():
+    """Documents why the role column is not claimed as an attack surface."""
+    import asyncio
+    a = LlamaIndexMemoryAdapter()
+    a.setup()
+    try:
+        a.seed(5)
+        a.write_meta(1, {"role": "system"})
+        msgs = asyncio.run(a._memory(SESSION).aget())
+        assert msgs[1].role.value == "assistant"
+    finally:
+        a.teardown()
