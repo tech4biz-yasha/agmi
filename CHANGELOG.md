@@ -1,6 +1,17 @@
 # Changelog
 
+## Unreleased (0.6.1)
+
+- New at-rest row: OpenAI Agents SDK `SQLiteSession` (openai-agents 0.20.0). Accepts all eight edits T1 to T8. Adapter `agmi/adapters/openai_agents_session.py`, pinned tests `tests/test_openai_agents_session.py`, extra `openai-agents`.
+- Site: design guide, per-edit explainers with live rows, memory agent page, animated diagrams, proposed conformance levels.
+
 ## Unreleased
+- The site (agentmemoryintegrity.org) is now generated from the committed
+  results file by `site/build.py` into `docs/site/`: home with the finding
+  and a T6 animation, scorecard with a detail drawer per cell, the fourteen
+  edits and attacks with pictograms, method with the IETF 5.4.7 mapping,
+  dated findings, run-it, cite; plus llms.txt, sitemap and robots. CI fails
+  if the site and the results file disagree.
 
 ## 0.6.0 (2026-09-25)
 Software record: https://doi.org/10.5281/zenodo.22957647

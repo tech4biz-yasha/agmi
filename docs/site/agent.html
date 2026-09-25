@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The memory agent, Agent Memory Integrity</title>
+<meta name="description" content="agmi&#x27;s memory agent hunts attacks, channels and mutations for the first that lands, proves it against a positive control, and reports only what it proved, behind an authorisation gate that fails closed.">
+<meta name="author" content="Yasha Khandelwal">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<link rel="canonical" href="https://agentmemoryintegrity.org/agent.html">
+<meta property="og:title" content="The memory agent, Agent Memory Integrity">
+<meta property="og:description" content="agmi&#x27;s memory agent hunts attacks, channels and mutations for the first that lands, proves it against a positive control, and reports only what it proved, behind an authorisation gate that fails closed.">
+<meta property="og:url" content="https://agentmemoryintegrity.org/agent.html">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","@id":"https://agentmemoryintegrity.org/#software","name":"agmi: Agent Memory Integrity","codeRepository":"https://github.com/tech4biz-yasha/agmi","programmingLanguage":"Python","license":"https://opensource.org/licenses/MIT","version":"0.6.0","identifier":"https://doi.org/10.5281/zenodo.22860886","author":{"@id":"https://yashakhandelwal.com/#person"},"url":"https://agentmemoryintegrity.org/"},{"@type":"Person","@id":"https://yashakhandelwal.com/#person","name":"Yasha Khandelwal","url":"https://yashakhandelwal.com/","email":"yasha.khandelwal@tech4biz.io","sameAs":["https://orcid.org/0009-0005-2166-4951","https://github.com/tech4biz-yasha"]},{"@type":"Dataset","@id":"https://agentmemoryintegrity.org/#scorecard","name":"Agent Memory Integrity scorecard","url":"https://agentmemoryintegrity.org/scorecard.html","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://yashakhandelwal.com/#person"},"isBasedOn":"https://github.com/tech4biz-yasha/agmi","measurementTechnique":"Seed through the tool's own API, apply one edit to the store, restart, read through the tool's own read path, record the tool's own verdict"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="index.html"><img src="logo.svg" alt="" width="28" height="28"><span>Agent Memory Integrity</span></a>
+  <nav class="nav" aria-label="Site"><a href="index.html">Overview</a><a href="scorecard.html">Scorecard</a><a href="edits.html">The edits</a><a href="architecture.html">Architecture</a><a href="method.html">Method</a><a href="agent.html" aria-current=page>Memory agent</a><a href="findings.html">Findings</a><a href="ecosystem.html">Ecosystem</a><a href="run.html">Run it</a><a href="cite.html">Cite</a><a href="about.html">About</a></nav>
+  <a class="gh" href="https://github.com/tech4biz-yasha/agmi">GitHub</a>
+</header>
+<main id="main">
+<section class="part"><h1>The memory agent</h1>
+<p class="lede">The scorecard measures a store against fixed attacks. The agent does the opposite: point it at one target and it searches the attacks, channels and mutations for the first that gets a false memory served as trusted, proves each landing, and reports only what it proved, with the exact steps to reproduce.</p>
+<figure class="diag"><svg viewBox="0 0 900 300" role="img" aria-labelledby="dh-t"><title id="dh-t">The hunt loop</title>
+<g class="step"><rect x="20" y="110" width="150" height="70" rx="10" class="box box-agent"/><text x="95" y="138" class="bt">authorise</text><text x="95" y="160" class="bs">fails closed</text></g>
+<path d="M172 145 H208" class="flow" marker-end="url(#ah)"/>
+<g class="step"><rect x="212" y="90" width="190" height="110" rx="10" class="box"/><text x="307" y="118" class="bt">pick the next attempt</text><text x="307" y="142" class="bs">6 attacks</text><text x="307" y="160" class="bs">3 channels</text><text x="307" y="178" class="bs">base fixture, then mutations</text></g>
+<path d="M404 145 H440" class="flow" marker-end="url(#ah)"/>
+<g class="step"><rect x="436" y="110" width="166" height="70" rx="10" class="box box-attack"/><text x="519" y="138" class="bt">write, then read</text><text x="519" y="160" class="bs">as the victim would</text></g>
+<path d="M604 145 H622" class="flow" marker-end="url(#ah)"/>
+<g class="step"><rect x="626" y="110" width="176" height="70" rx="10" class="box"/><text x="714" y="138" class="bt">served as trusted?</text><text x="714" y="160" class="bs">positive control checked</text></g>
+<path d="M714 108 C 714 40, 307 40, 307 88" class="flow" marker-end="url(#ah)"/><text x="509" y="34" class="bn">no: next attempt</text>
+<path d="M714 182 V226" class="flow" marker-end="url(#ah)"/>
+<g class="step"><rect x="580" y="230" width="268" height="60" rx="10" class="box box-verdict"/><text x="714" y="254" class="bt">finding</text><text x="714" y="276" class="bs">proof, served text, reproduction script</text></g>
+<text x="20" y="220" class="bn" style="text-anchor:start">library target: allowed</text><text x="20" y="238" class="bn" style="text-anchor:start">localhost: allowed</text><text x="20" y="256" class="bn" style="text-anchor:start">other host: token named for it, or consent file</text><text x="20" y="274" class="bn" style="text-anchor:start">anything else: raises before the hunt starts</text>
+</svg><figcaption>The agent searches attacks, channels and mutations for the first that lands, proves each landing against a positive control, and reports only what it proved. The gate runs before any target is touched.</figcaption></figure>
+<h2>What a finding contains</h2>
+<ul class="rules">
+<li>The attack, the channel and the mutation that landed, with the attack's version.</li>
+<li>The positive control: the genuine memory the victim could still read in the same store state. Without it there is no finding.</li>
+<li>The text that was served back as trusted, exactly as the read path returned it.</li>
+<li>A reproduction script: the writes, the query and the key, so anyone with the same target reaches the same cell.</li>
+</ul>
+<h2>Measured 24 September 2026, macOS arm64, Python 3.12</h2>
+<div class="matrixwrap"><table class="roadmap"><thead><tr><th>Target</th><th>Attempts</th><th>Findings</th><th>Channel of every finding</th><th>Mutation needed</th></tr></thead><tbody><tr><td>Mem0 local Qdrant store, all-MiniLM-L6-v2</td><td>5</td><td>5</td><td>external</td><td>none</td></tr><tr><td>LangGraph SqliteStore, all-MiniLM-L6-v2</td><td>5</td><td>5</td><td>external</td><td>none</td></tr><tr><td>inspeximus 3.0.0, default</td><td>5</td><td>5</td><td>external</td><td>none</td></tr><tr><td>Letta archival memory, all-MiniLM-L6-v2</td><td>4</td><td>4 (no metadata filter, so that attack does not apply)</td><td>external</td><td>none</td></tr><tr><td>reference-defended (model)</td><td>131</td><td>4</td><td>agent-laundered only</td><td>dilute, on the hijack</td></tr></tbody></table></div>
+<p>One attempt per attack means the first base fixture on the honest channel landed; nothing had to be disguised or laundered. The only target that made the agent search is the defended reference store, and the only channel it landed on there is the one no store can close, because the victim's own agent did the writing. Every proven landing is a new fixed row for the scorecard.</p>
+<h2>A security tool, not an attack tool</h2>
+<p>Two things keep it that way. The authorisation gate runs before any target is touched and fails closed: a library target the caller already holds is allowed, the caller's own loopback is allowed, a network host is allowed only on proven control (an environment token named for that host, or a consent file the operator writes), and anything else raises before the hunt starts. The run records which authorisation it used. And the agent reports only what it proved: no heuristics, no "likely vulnerable", a finding is a served text and a script.</p>
+<h2>Run it</h2>
+<pre><code>pip install agent-memory-integrity
+python -m agmi.agent --target defended                 # a library target
+python -m agmi.agent --target mem0 --embedder minilm --json</code></pre>
+<p>Phase 3 puts live targets behind the same gate (MCP memory servers, deployed LangGraph and Letta) and adds an obedience oracle that proves the agent acted on the poison, not only that it was served.</p>
+</section>
+</main>
+<footer class="foot">
+  <p>agmi 0.6.0. Measured 2026-09-26 on Darwin arm64, Python 3.12. Every cell on this site is read from the committed results file and reproduced in CI on every change.</p>
+  <p>Built and maintained by <a href="https://yashakhandelwal.com/">Yasha Khandelwal</a> (<a href="mailto:yasha.khandelwal@tech4biz.io">yasha.khandelwal@tech4biz.io</a>, <a href="https://orcid.org/0009-0005-2166-4951">ORCID</a>). Hosted assessments and vendor badges through <a href="https://audittraxlabs.com/">AuditTrax Labs</a>. MIT licence. <a href="https://github.com/tech4biz-yasha/agmi">Source</a>, <a href="https://pypi.org/project/agent-memory-integrity/">PyPI</a>, <a href="https://doi.org/10.5281/zenodo.22860886">Zenodo</a>, <a href="about.html">About</a>.</p>
+</footer>
+<div id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="drawer-card">
+    <button type="button" class="drawer-close" aria-label="Close">×</button>
+    <p class="drawer-kicker" id="dkick"></p>
+    <h2 id="dtitle"></h2>
+    <p id="dverdict" class="drawer-verdict"></p>
+    <dl>
+      <dt>What the tool said</dt><dd id="ddetail"></dd>
+      <dt>Detection point</dt><dd id="dpoint"></dd>
+      <dt>Reproduce</dt><dd><code id="drepro"></code></dd>
+    </dl>
+  </div>
+</div>
+<script src="site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ecosystem, Agent Memory Integrity</title>
+<meta name="description" content="The standards text, vendor threads, maintainer-contributed rows, assessments and roadmap around the agmi measurement.">
+<meta name="author" content="Yasha Khandelwal">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<link rel="canonical" href="https://agentmemoryintegrity.org/ecosystem.html">
+<meta property="og:title" content="Ecosystem, Agent Memory Integrity">
+<meta property="og:description" content="The standards text, vendor threads, maintainer-contributed rows, assessments and roadmap around the agmi measurement.">
+<meta property="og:url" content="https://agentmemoryintegrity.org/ecosystem.html">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","@id":"https://agentmemoryintegrity.org/#software","name":"agmi: Agent Memory Integrity","codeRepository":"https://github.com/tech4biz-yasha/agmi","programmingLanguage":"Python","license":"https://opensource.org/licenses/MIT","version":"0.6.0","identifier":"https://doi.org/10.5281/zenodo.22860886","author":{"@id":"https://yashakhandelwal.com/#person"},"url":"https://agentmemoryintegrity.org/"},{"@type":"Person","@id":"https://yashakhandelwal.com/#person","name":"Yasha Khandelwal","url":"https://yashakhandelwal.com/","email":"yasha.khandelwal@tech4biz.io","sameAs":["https://orcid.org/0009-0005-2166-4951","https://github.com/tech4biz-yasha"]},{"@type":"Dataset","@id":"https://agentmemoryintegrity.org/#scorecard","name":"Agent Memory Integrity scorecard","url":"https://agentmemoryintegrity.org/scorecard.html","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://yashakhandelwal.com/#person"},"isBasedOn":"https://github.com/tech4biz-yasha/agmi","measurementTechnique":"Seed through the tool's own API, apply one edit to the store, restart, read through the tool's own read path, record the tool's own verdict"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="index.html"><img src="logo.svg" alt="" width="28" height="28"><span>Agent Memory Integrity</span></a>
+  <nav class="nav" aria-label="Site"><a href="index.html">Overview</a><a href="scorecard.html">Scorecard</a><a href="edits.html">The edits</a><a href="architecture.html">Architecture</a><a href="method.html">Method</a><a href="agent.html">Memory agent</a><a href="findings.html">Findings</a><a href="ecosystem.html" aria-current=page>Ecosystem</a><a href="run.html">Run it</a><a href="cite.html">Cite</a><a href="about.html">About</a></nav>
+  <a class="gh" href="https://github.com/tech4biz-yasha/agmi">GitHub</a>
+</header>
+<main id="main">
+<section class="part"><h1>Ecosystem</h1>
+<p>agmi is built to be the measurement other people's work points at: the standards text, the vendor threads, the maintainer-contributed rows and the assessments all hang off the same results file.</p>
+<figure class="diag"><svg viewBox="0 0 900 330" role="img" aria-labelledby="de-t"><title id="de-t">Where agmi sits</title>
+<rect x="330" y="120" width="240" height="90" rx="14" class="box box-agent"/><text x="450" y="152" class="bt">agmi</text><text x="450" y="174" class="bs">the measurement</text><text x="450" y="192" class="bs">open, MIT, reproducible</text>
+<rect x="20" y="20" width="250" height="80" rx="10" class="box"/><text x="145" y="46" class="bt">Standards</text><text x="145" y="66" class="bs">IETF BMWG 5.4.7 method text</text><text x="145" y="84" class="bs">OWASP agentic security, ASI06</text>
+<path d="M272 60 C 300 60, 320 130, 358 140" class="flow" marker-end="url(#ah)"/>
+<rect x="630" y="20" width="250" height="80" rx="10" class="box"/><text x="755" y="46" class="bt">Vendors</text><text x="755" y="66" class="bs">LangGraph, Letta, Mem0, inspeximus</text><text x="755" y="84" class="bs">issues, fixes, re-measured rows</text>
+<path d="M628 60 C 600 60, 580 130, 542 140" class="flow" marker-end="url(#ah)"/>
+<rect x="20" y="230" width="250" height="80" rx="10" class="box"/><text x="145" y="256" class="bt">Contributors</text><text x="145" y="276" class="bs">maintainers submit adapters and rows</text><text x="145" y="294" class="bs">with the control cases as tests</text>
+<path d="M272 270 C 300 270, 320 200, 358 190" class="flow" marker-end="url(#ah)"/>
+<rect x="630" y="230" width="250" height="80" rx="10" class="box"/><text x="755" y="256" class="bt">Assessments</text><text x="755" y="276" class="bs">hosted runs and vendor badges</text><text x="755" y="294" class="bs">through AuditTrax Labs, from 1.0</text>
+<path d="M628 270 C 600 270, 580 200, 542 190" class="flow" marker-end="url(#ah)"/>
+</svg><figcaption>The measurement in the middle; standards, vendors, contributors and assessments around it. The open benchmark stays free. Hosted runs and badges are the paid layer, from 1.0.</figcaption></figure>
+<h2>Standards</h2>
+<dl class="eco">
+<dt>IETF BMWG</dt><dd>China Mobile's draft-han-bmwg-agent-security-benchmark defines metric 5.4.7, Protection of Memory Data Integrity, with no test method. The eight edits, verdict words, control cases and scoring rule were sent to the working group list on 24 September 2026 as proposed text for a new Section 6.6, with measured verdicts. agmi is that method's reference implementation. <a href="https://mailarchive.ietf.org/arch/browse/bmwg/">Archive</a>.</dd>
+<dt>OWASP</dt><dd>The front-door attacks map to the agentic security initiative's memory and context poisoning category (ASI06). agmi is offered there as the way to test it.</dd>
+</dl>
+<h2>Stores measured</h2>
+<dl class="eco">
+<dt>LangGraph</dt><dd>SqliteSaver and SqliteStore. Issue <a href="https://github.com/langchain-ai/langgraph/issues/9004">#9004</a> (encrypted checkpointer replay) was raised from these measurements; a community fix was verified with the suite and its remaining gap (deletion rollback) is on record.</dd>
+<dt>Letta</dt><dd>Block checkpoint history and archival memory.</dd>
+<dt>Mem0</dt><dd>Local Qdrant store, at rest and front door.</dd>
+<dt>inspeximus</dt><dd>Five rows: default, receipts on (two attacker positions), and two defended trust-root configurations contributed by its maintainer with the control cases as tests. The receipts-on rows carry the T6 finding: a receipt binds text and key, not the owning user.</dd>
+</dl>
+<h2>Contributors</h2>
+<p>Rows come from maintainers as well as from the suite's author. The inspeximus defended rows were submitted by the tool's maintainer, DanceNitra, with the two control cases from the issue thread written as tests, and reproduced independently before publication. That is the pattern for every future vendor row: an adapter, the measured cells, the controls as tests, an independent reproduction.</p>
+<h2>Assessments</h2>
+<p>The open benchmark is free and stays free. From 1.0, <a href="https://audittraxlabs.com/">AuditTrax Labs</a> offers hosted runs against a vendor's own deployment, conformance levels, and a badge that links back to the public row, so a claim of tamper evidence is a link to a measurement.</p>
+<h2>Conformance levels, proposed for 1.0</h2>
+<p>A level is a claim a vendor can make and a reader can check against the row it links to. Levels are earned on the read path: a store that only finds the edit on a separate audit call stays at L0 with its cells marked reported. This is the proposed ladder; it is published at 1.0 once two vendors have earned a level above L0.</p>
+<div class="matrixwrap"><table class="roadmap levels"><thead><tr><th>Level</th><th>Name</th><th>What it requires</th><th>Rows there today</th></tr></thead><tbody><tr><th scope="row">L0</th><td>Measured</td><td>The store has a published row. Any verdicts.</td><td>LangGraph SqliteSaver, OpenAI Agents SDK SQLiteSession, Letta block checkpoint history, Mem0 local Qdrant store, inspeximus, receipts off (default), inspeximus, receipts on, attacker holds the store directory, inspeximus, receipts on, attacker also holds the config home</td></tr><tr><th scope="row">L1</th><td>Bytes bound</td><td>Rejects on the read path every edit that changes or adds bytes: T1, T3, T5.</td><td>OpenFang model, tip-persistence fix</td></tr><tr><th scope="row">L2</th><td>Sequence bound</td><td>Also rejects deletion, reordering and rollback: T2, T4, T7.</td><td>none yet</td></tr><tr><th scope="row">L3</th><td>Context bound</td><td>Also rejects a record moved between owners and a metadata change: T6, T8.</td><td>none yet</td></tr></tbody></table></div>
+<h2>Roadmap</h2>
+<div class="matrixwrap"><table class="roadmap"><thead><tr><th>Phase</th><th>Scope</th><th>Status</th></tr></thead><tbody><tr class="rm-done"><th scope="row">0.1 to 0.5</th><td>Attack catalogue, adapter interface, five at-rest edits on LangGraph, Letta and Mem0; inspeximus rows from its maintainer, reproduced independently; preprint, software DOI, PyPI</td><td>done</td></tr><tr class="rm-done"><th scope="row">Phase 1</th><td>Three attacker channels (external, laundered, agent-laundered), signed writes, attacker level on every cell</td><td>done</td></tr><tr class="rm-done"><th scope="row">Phase 2</th><td>Mutation engine on every attacker write; update poisoning and metadata poisoning; twelve-column front-door scorecard on four real stores</td><td>done</td></tr><tr class="rm-done"><th scope="row">Memory agent v1</th><td>Hunt loop over six attacks, three channels and mutations; proof and reproduction script per finding; authorisation gate that fails closed</td><td>done</td></tr><tr class="rm-done"><th scope="row">0.6.0</th><td>Eight at-rest edits T1 to T8 with control cases and read/audit detection points, matching the proposed IETF 5.4.7 method; agmi-check and the GitHub Action</td><td>done</td></tr><tr class="rm-next"><th scope="row">Phase 3</th><td>Live targets over HTTP (MCP memory servers, deployed LangGraph and Letta) behind the authorisation gate; obedience oracle that proves the agent acted on the poison; ingestion marking measured per framework</td><td>next</td></tr><tr class="rm-planned"><th scope="row">Phase 4</th><td>Memory agent driving content-only attacks through a real model, same proof discipline</td><td>planned</td></tr><tr class="rm-planned"><th scope="row">0.9</th><td>Deserialization safety, and a reference integrity layer (a hash chain over checkpoint ids) offered upstream as an optional mode</td><td>planned</td></tr><tr class="rm-planned"><th scope="row">1.0</th><td>Stable adapter interface, published conformance levels, vendor badges, monthly report cadence; hosted runs through AuditTrax Labs, the open benchmark free</td><td>planned</td></tr></tbody></table></div>
+</section>
+</main>
+<footer class="foot">
+  <p>agmi 0.6.0. Measured 2026-09-26 on Darwin arm64, Python 3.12. Every cell on this site is read from the committed results file and reproduced in CI on every change.</p>
+  <p>Built and maintained by <a href="https://yashakhandelwal.com/">Yasha Khandelwal</a> (<a href="mailto:yasha.khandelwal@tech4biz.io">yasha.khandelwal@tech4biz.io</a>, <a href="https://orcid.org/0009-0005-2166-4951">ORCID</a>). Hosted assessments and vendor badges through <a href="https://audittraxlabs.com/">AuditTrax Labs</a>. MIT licence. <a href="https://github.com/tech4biz-yasha/agmi">Source</a>, <a href="https://pypi.org/project/agent-memory-integrity/">PyPI</a>, <a href="https://doi.org/10.5281/zenodo.22860886">Zenodo</a>, <a href="about.html">About</a>.</p>
+</footer>
+<div id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="drawer-card">
+    <button type="button" class="drawer-close" aria-label="Close">×</button>
+    <p class="drawer-kicker" id="dkick"></p>
+    <h2 id="dtitle"></h2>
+    <p id="dverdict" class="drawer-verdict"></p>
+    <dl>
+      <dt>What the tool said</dt><dd id="ddetail"></dd>
+      <dt>Detection point</dt><dd id="dpoint"></dd>
+      <dt>Reproduce</dt><dd><code id="drepro"></code></dd>
+    </dl>
+  </div>
+</div>
+<script src="site.js" defer></script>
+</body>
+</html>

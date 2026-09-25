@@ -30,6 +30,7 @@ The eight edits are the ones proposed as the test method for IETF draft-han-bmwg
 | Target | Version | T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 |
 |---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | LangGraph `SqliteSaver` | langgraph-checkpoint-sqlite 3.1.1 | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
+| OpenAI Agents SDK `SQLiteSession` | openai-agents 0.20.0 | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
 | Letta core memory checkpoint history | letta 0.16.8 | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
 | Mem0 local Qdrant store | mem0ai 2.0.20 | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
 | inspeximus, receipts off (default), read path | inspeximus 3.0.0 | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
@@ -38,7 +39,7 @@ The eight edits are the ones proposed as the test method for IETF draft-han-bmwg
 
 One cell in the receipts rows is new and worth a sentence: a receipt binds a record's text and key, but not the user it belongs to, so a genuine signed record lifted from another user's context (T6) still passes the audit. Rollback (T7) and metadata edits (T8) are caught. That is the same shape as the LangGraph encrypted-checkpointer finding in langchain-ai/langgraph#9004, in a second, independent tool.
 
-The runner prints the same words as these tables (accepted, rejected, reported; surfaced, kept out), the at-rest words following the method proposed for IETF draft-han-bmwg-agent-security-benchmark 5.4.7. The tests pin the underlying status values (`safe`, `VULNERABLE`, `n/a`), so a wording change can never move a cell.
+The public site at [agentmemoryintegrity.org](https://agentmemoryintegrity.org/) is generated from the same results file by `python site/build.py` (output in `docs/site/`), and CI fails if the site and the results file disagree. The runner prints the same words as these tables (accepted, rejected, reported; surfaced, kept out), the at-rest words following the method proposed for IETF draft-han-bmwg-agent-security-benchmark 5.4.7. The tests pin the underlying status values (`safe`, `VULNERABLE`, `n/a`), so a wording change can never move a cell.
 
 "Accepted" means the tool loaded the altered store, raised nothing, and the agent carried on from the altered memory as if it were true. "Rejected" means the tool refused the edit at read time. "Reported" means the tool's own integrity check named the problem after a reload, and only that. After any of the five attacks the store still loads and the read path (`recall()` for inspeximus) answers from the altered store, so a reported cell says a separate audit call (`verify_writes()` in the inspeximus rows) caught it, not that the agent was protected at read time. `full_runner` names the detection point in a checkedAt column: "read" when verify() is the read path, "audit" when it is a call the operator has to make. This table has no such column; every reported cell in it is an audit detection. Every row is a measurement of the real library at the version shown, reproducible in under a minute, and pinned by a test that fails the day that library adds a check.
 
@@ -327,6 +328,18 @@ Every attack carries a version (`memory_injection@v2`, `retrieval_hijack@v3`, an
 | verify() | True if the thread loads and every row deserializes |
 
 There is no integrity logic on the store. The only thing that can fail on reload is deserialization, so a tamper that keeps the msgpack valid is invisible. After `forge` the agent resumes from the attacker's checkpoint.
+
+### OpenAI Agents SDK `SQLiteSession`
+
+| | |
+|---|---|
+| Measured on | openai-agents 0.20.0, macOS arm64, Python 3.12 |
+| What is targeted | The `agent_messages` table: one row per conversation item, JSON `message_data`, owner in `session_id`, order by autoincrement `id` |
+| Seeded through | `SQLiteSession.add_items()` |
+| Read back through | `SQLiteSession.get_items()`, which is what the SDK feeds the model on the next run |
+| verify() | True if `get_items()` returns without raising |
+
+The session store has no integrity logic. `get_items()` decodes each row's JSON and silently skips a row that does not decode, so even a corrupted row does not raise; a tamper that keeps the JSON valid is served as the agent's own history. T6 copies user B's item over user A's row keeping A's `session_id`, and A's next run is fed B's text. T8 rewrites the row's `session_id`, which moves an item to another user's history. The only metadata the store keeps is `session_id` and `created_at`.
 
 ### LangGraph long-term store (`SqliteStore`)
 

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>About, Agent Memory Integrity</title>
+<meta name="description" content="Who builds agmi, why it exists, how it is funded, and the independence rules for published rows.">
+<meta name="author" content="Yasha Khandelwal">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<link rel="canonical" href="https://agentmemoryintegrity.org/about.html">
+<meta property="og:title" content="About, Agent Memory Integrity">
+<meta property="og:description" content="Who builds agmi, why it exists, how it is funded, and the independence rules for published rows.">
+<meta property="og:url" content="https://agentmemoryintegrity.org/about.html">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","@id":"https://agentmemoryintegrity.org/#software","name":"agmi: Agent Memory Integrity","codeRepository":"https://github.com/tech4biz-yasha/agmi","programmingLanguage":"Python","license":"https://opensource.org/licenses/MIT","version":"0.6.0","identifier":"https://doi.org/10.5281/zenodo.22860886","author":{"@id":"https://yashakhandelwal.com/#person"},"url":"https://agentmemoryintegrity.org/"},{"@type":"Person","@id":"https://yashakhandelwal.com/#person","name":"Yasha Khandelwal","url":"https://yashakhandelwal.com/","email":"yasha.khandelwal@tech4biz.io","sameAs":["https://orcid.org/0009-0005-2166-4951","https://github.com/tech4biz-yasha"]},{"@type":"Dataset","@id":"https://agentmemoryintegrity.org/#scorecard","name":"Agent Memory Integrity scorecard","url":"https://agentmemoryintegrity.org/scorecard.html","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://yashakhandelwal.com/#person"},"isBasedOn":"https://github.com/tech4biz-yasha/agmi","measurementTechnique":"Seed through the tool's own API, apply one edit to the store, restart, read through the tool's own read path, record the tool's own verdict"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="index.html"><img src="logo.svg" alt="" width="28" height="28"><span>Agent Memory Integrity</span></a>
+  <nav class="nav" aria-label="Site"><a href="index.html">Overview</a><a href="scorecard.html">Scorecard</a><a href="edits.html">The edits</a><a href="architecture.html">Architecture</a><a href="method.html">Method</a><a href="agent.html">Memory agent</a><a href="findings.html">Findings</a><a href="ecosystem.html">Ecosystem</a><a href="run.html">Run it</a><a href="cite.html">Cite</a><a href="about.html" aria-current=page>About</a></nav>
+  <a class="gh" href="https://github.com/tech4biz-yasha/agmi">GitHub</a>
+</header>
+<main id="main">
+<section class="part"><h1>About</h1>
+<p>agmi is built and maintained by <a href="https://yashakhandelwal.com/">Yasha Khandelwal</a>, a principal architect with twenty years in enterprise systems, previously at Cisco, Google and SpaceX, now co-founder and CEO of Tech4Biz Solutions in Bengaluru. Contact <a href="mailto:yasha.khandelwal@tech4biz.io">yasha.khandelwal@tech4biz.io</a>; <a href="https://orcid.org/0009-0005-2166-4951">ORCID 0009-0005-2166-4951</a>; <a href="https://github.com/tech4biz-yasha">GitHub</a>.</p>
+<h2>Why this exists</h2>
+<p>Agents are being given memory that outlives a session, and that memory is being trusted as if it were the agent's own experience. Nobody was measuring whether the stores holding it notice when it is changed. The first measurement, in September 2026, showed that none of the popular stores do. This site keeps that measurement current, in public, in a form a vendor can reproduce and a standards body can cite.</p>
+<h2>How it is funded</h2>
+<p>The suite, the scorecard and this site are open source under MIT and are not funded by any of the vendors measured. Hosted assessments and vendor badges are offered through <a href="https://audittraxlabs.com/">AuditTrax Labs</a>, a technical due-diligence firm, from version 1.0. Vendor rows on the public scorecard are never paid for and are reproduced independently before publication.</p>
+<h2>Independence rules</h2>
+<ul class="rules">
+<li>A vendor cannot change a published cell. Only a re-measurement on a new version can, and the old row stays in the history.</li>
+<li>Maintainer-contributed rows are labelled as such and reproduced by the suite's author before they appear.</li>
+<li>Findings are raised with the vendor on their own tracker before they are written up here, and the thread is linked.</li>
+</ul>
+</section>
+</main>
+<footer class="foot">
+  <p>agmi 0.6.0. Measured 2026-09-26 on Darwin arm64, Python 3.12. Every cell on this site is read from the committed results file and reproduced in CI on every change.</p>
+  <p>Built and maintained by <a href="https://yashakhandelwal.com/">Yasha Khandelwal</a> (<a href="mailto:yasha.khandelwal@tech4biz.io">yasha.khandelwal@tech4biz.io</a>, <a href="https://orcid.org/0009-0005-2166-4951">ORCID</a>). Hosted assessments and vendor badges through <a href="https://audittraxlabs.com/">AuditTrax Labs</a>. MIT licence. <a href="https://github.com/tech4biz-yasha/agmi">Source</a>, <a href="https://pypi.org/project/agent-memory-integrity/">PyPI</a>, <a href="https://doi.org/10.5281/zenodo.22860886">Zenodo</a>, <a href="about.html">About</a>.</p>
+</footer>
+<div id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="drawer-card">
+    <button type="button" class="drawer-close" aria-label="Close">×</button>
+    <p class="drawer-kicker" id="dkick"></p>
+    <h2 id="dtitle"></h2>
+    <p id="dverdict" class="drawer-verdict"></p>
+    <dl>
+      <dt>What the tool said</dt><dd id="ddetail"></dd>
+      <dt>Detection point</dt><dd id="dpoint"></dd>
+      <dt>Reproduce</dt><dd><code id="drepro"></code></dd>
+    </dl>
+  </div>
+</div>
+<script src="site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+# Agent Memory Integrity (agmi)
+> A conformance test suite that measures whether AI agent memory and checkpoint stores notice when they are tampered with.
+
+Version 0.6.0, measured 2026-09-26. Source: https://github.com/tech4biz-yasha/agmi
+Method text proposed for IETF draft-han-bmwg-agent-security-benchmark metric 5.4.7.
+
+## At rest (eight storage-level edits, attacker has store access, no keys)
+- OpenFang model, tip-persistence fix (reference model of a hash chain): T1 rejected, T2 rejected, T3 rejected, T4 rejected, T5 rejected, T6 n/a, T7 n/a, T8 n/a
+- LangGraph SqliteSaver (langgraph-checkpoint-sqlite 3.1.1): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
+- OpenAI Agents SDK SQLiteSession (openai-agents 0.20.0): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
+- Letta block checkpoint history (letta 0.16.8): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
+- Mem0 local Qdrant store (mem0ai 2.0.20): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
+- inspeximus, receipts off (default) (inspeximus 3.0.0): T1 accepted, T2 accepted, T3 accepted, T4 accepted, T5 accepted, T6 accepted, T7 accepted, T8 accepted
+- inspeximus, receipts on, attacker holds the store directory (inspeximus 3.0.0): T1 reported, T2 reported, T3 reported, T4 reported, T5 reported, T6 accepted, T7 reported, T8 reported
+- inspeximus, receipts on, attacker also holds the config home (inspeximus 3.0.0): T1 reported, T2 accepted, T3 reported, T4 reported, T5 reported, T6 accepted, T7 reported, T8 reported
+
+## Front door (six attacks through the tool's own write path)
+- LangGraph SqliteStore: Planted fact surfaced, Cross-user leak kept out, Retrieval hijack surfaced, Hidden instruction surfaced, Update poisoning surfaced, Metadata poisoning surfaced
+- Letta archival memory: Planted fact surfaced, Cross-user leak kept out, Retrieval hijack surfaced, Hidden instruction surfaced, Update poisoning surfaced, Metadata poisoning n/a
+- Mem0 local Qdrant store: Planted fact surfaced, Cross-user leak kept out, Retrieval hijack surfaced, Hidden instruction surfaced, Update poisoning surfaced, Metadata poisoning surfaced
+- inspeximus, receipts off (default): Planted fact surfaced, Cross-user leak kept out, Retrieval hijack surfaced, Hidden instruction surfaced, Update poisoning surfaced, Metadata poisoning surfaced
+- inspeximus, trust root keyed on the label: Planted fact surfaced, Cross-user leak kept out, Retrieval hijack surfaced, Hidden instruction surfaced, Update poisoning surfaced, Metadata poisoning surfaced
+- inspeximus, trust root keyed on an attested key: Planted fact surfaced, Cross-user leak kept out, Retrieval hijack surfaced, Hidden instruction surfaced, Update poisoning surfaced, Metadata poisoning surfaced
+- Reference store, user-scoped: Planted fact surfaced, Cross-user leak kept out, Retrieval hijack surfaced, Hidden instruction surfaced, Update poisoning surfaced, Metadata poisoning surfaced
+- Reference store, unscoped: Planted fact surfaced, Cross-user leak surfaced, Retrieval hijack surfaced, Hidden instruction surfaced, Update poisoning surfaced, Metadata poisoning surfaced
+- Reference store, defended: Planted fact surfaced, Cross-user leak kept out, Retrieval hijack kept out, Hidden instruction kept out, Update poisoning surfaced, Metadata poisoning surfaced
+
+## Pages
+- https://agentmemoryintegrity.org/scorecard.html
+- https://agentmemoryintegrity.org/edits.html
+- https://agentmemoryintegrity.org/method.html
+- https://agentmemoryintegrity.org/findings.html
+- https://agentmemoryintegrity.org/run.html
+- https://agentmemoryintegrity.org/cite.html
+- https://agentmemoryintegrity.org/architecture.html
+- https://agentmemoryintegrity.org/agent.html
+- https://agentmemoryintegrity.org/ecosystem.html
+- https://agentmemoryintegrity.org/about.html
+
+## Author
+Yasha Khandelwal, https://yashakhandelwal.com/, yasha.khandelwal@tech4biz.io. Hosted assessments: https://audittraxlabs.com/

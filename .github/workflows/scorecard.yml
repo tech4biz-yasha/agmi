@@ -21,7 +21,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,langgraph,letta,mem0,inspeximus]"
+          pip install -e ".[dev,langgraph,openai-agents,letta,mem0,inspeximus]"
       - name: Lint (correctness only)
         run: ruff check agmi tests
       - name: Tests
@@ -43,6 +43,8 @@ jobs:
         env:
           PYTHONPATH: .
         run: python -m agmi.render results/scorecard.json docs/scorecard.md --check
+      - name: The site matches the committed results file
+        run: python site/build.py --check
       - name: This run agrees with the committed results file on every cell both measured
         env:
           PYTHONPATH: .

@@ -106,6 +106,11 @@ def _letta_archival_semantic():
 def full_scorecard() -> str:
     from agmi.adapters.openfang import OpenFangAdapter
     from agmi.adapters.langgraph_sqlite import LangGraphSqliteAdapter
+    try:
+        from agmi.adapters.openai_agents_session import OpenAIAgentsSessionAdapter
+        openai_session = OpenAIAgentsSessionAdapter()
+    except ImportError:
+        openai_session = None
     lg_store = _langgraph_store_semantic()
     letta_archival = _letta_archival_semantic()
     try:
@@ -150,6 +155,7 @@ def full_scorecard() -> str:
     rows = [
         ("openfang(model,fixed)", OpenFangAdapter(strict_tip=True), None),
         ("langgraph-sqlite", LangGraphSqliteAdapter(), None),
+        *([("openai-agents-sqlite-session", openai_session, None)] if openai_session else []),
         *([("langgraph-sqlite-store", None, lg_store)] if lg_store else []),
         *([letta_row] if letta_row else []),
         *([("letta-archival", None, letta_archival)] if letta_archival else []),

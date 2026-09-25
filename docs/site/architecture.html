@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Architecture, Agent Memory Integrity</title>
+<meta name="description" content="How agmi measures a cell, where the attacker stands, how attacks, adapters, stores and the results file fit together, and what runs in a vendor&#x27;s CI.">
+<meta name="author" content="Yasha Khandelwal">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<link rel="canonical" href="https://agentmemoryintegrity.org/architecture.html">
+<meta property="og:title" content="Architecture, Agent Memory Integrity">
+<meta property="og:description" content="How agmi measures a cell, where the attacker stands, how attacks, adapters, stores and the results file fit together, and what runs in a vendor&#x27;s CI.">
+<meta property="og:url" content="https://agentmemoryintegrity.org/architecture.html">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","@id":"https://agentmemoryintegrity.org/#software","name":"agmi: Agent Memory Integrity","codeRepository":"https://github.com/tech4biz-yasha/agmi","programmingLanguage":"Python","license":"https://opensource.org/licenses/MIT","version":"0.6.0","identifier":"https://doi.org/10.5281/zenodo.22860886","author":{"@id":"https://yashakhandelwal.com/#person"},"url":"https://agentmemoryintegrity.org/"},{"@type":"Person","@id":"https://yashakhandelwal.com/#person","name":"Yasha Khandelwal","url":"https://yashakhandelwal.com/","email":"yasha.khandelwal@tech4biz.io","sameAs":["https://orcid.org/0009-0005-2166-4951","https://github.com/tech4biz-yasha"]},{"@type":"Dataset","@id":"https://agentmemoryintegrity.org/#scorecard","name":"Agent Memory Integrity scorecard","url":"https://agentmemoryintegrity.org/scorecard.html","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://yashakhandelwal.com/#person"},"isBasedOn":"https://github.com/tech4biz-yasha/agmi","measurementTechnique":"Seed through the tool's own API, apply one edit to the store, restart, read through the tool's own read path, record the tool's own verdict"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="index.html"><img src="logo.svg" alt="" width="28" height="28"><span>Agent Memory Integrity</span></a>
+  <nav class="nav" aria-label="Site"><a href="index.html">Overview</a><a href="scorecard.html">Scorecard</a><a href="edits.html">The edits</a><a href="architecture.html" aria-current=page>Architecture</a><a href="method.html">Method</a><a href="agent.html">Memory agent</a><a href="findings.html">Findings</a><a href="ecosystem.html">Ecosystem</a><a href="run.html">Run it</a><a href="cite.html">Cite</a><a href="about.html">About</a></nav>
+  <a class="gh" href="https://github.com/tech4biz-yasha/agmi">GitHub</a>
+</header>
+<main id="main">
+<section class="part"><h1>Architecture</h1>
+<p>Four pictures that explain the suite. If you read nothing else, read the captions.</p>
+<h2>How a cell is measured</h2>
+<figure class="diag"><svg viewBox="0 0 900 220" role="img" aria-labelledby="dp-t"><title id="dp-t">How one cell is measured</title>
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="ahead"/></marker></defs>
+<g class="step"><rect x="10" y="60" width="150" height="80" rx="10" class="box"/><text x="85" y="92" class="bt">Seed</text><text x="85" y="114" class="bs">through the tool's</text><text x="85" y="130" class="bs">own API</text></g>
+<path d="M162 100 H188" class="flow" marker-end="url(#ah)"/>
+<g class="step"><rect x="192" y="60" width="150" height="80" rx="10" class="box box-attack"/><text x="267" y="92" class="bt">Edit</text><text x="267" y="114" class="bs">one change to the</text><text x="267" y="130" class="bs">store, no keys</text></g>
+<path d="M344 100 H370" class="flow" marker-end="url(#ah)"/>
+<g class="step"><rect x="374" y="60" width="150" height="80" rx="10" class="box"/><text x="449" y="92" class="bt">Restart</text><text x="449" y="114" class="bs">nothing cached</text><text x="449" y="130" class="bs">in process</text></g>
+<path d="M526 100 H552" class="flow" marker-end="url(#ah)"/>
+<g class="step"><rect x="556" y="60" width="150" height="80" rx="10" class="box"/><text x="631" y="92" class="bt">Read</text><text x="631" y="114" class="bs">through the tool's</text><text x="631" y="130" class="bs">own read path</text></g>
+<path d="M708 100 H734" class="flow" marker-end="url(#ah)"/>
+<g class="step"><rect x="738" y="40" width="152" height="120" rx="10" class="box box-verdict"/><text x="814" y="70" class="bt">Verdict</text>
+<text x="814" y="96" class="bv v-rej-t">rejected</text><text x="814" y="118" class="bv v-rep-t">reported</text><text x="814" y="140" class="bv v-acc-t">accepted</text></g>
+<text x="85" y="185" class="bn">control: a reload with no edit must still verify, or the cell is n/a</text>
+<text x="631" y="185" class="bn">the verdict is what the tool does, never what we infer</text>
+</svg><figcaption>How one cell is measured. The attacker's edit is the only thing that changes between seed and read; the tool's own behaviour on read is the verdict.</figcaption></figure>
+<h2>Where the attacker stands</h2>
+<figure class="diag"><svg viewBox="0 0 900 300" role="img" aria-labelledby="dt-t"><title id="dt-t">Where the attacker stands</title>
+<rect x="330" y="30" width="240" height="240" rx="14" class="box box-agent"/><text x="450" y="62" class="bt">The agent</text>
+<rect x="360" y="84" width="180" height="56" rx="8" class="box"/><text x="450" y="108" class="bt">write path</text><text x="450" y="128" class="bs">remember, add, put</text>
+<rect x="360" y="156" width="180" height="56" rx="8" class="box"/><text x="450" y="180" class="bt">read path</text><text x="450" y="200" class="bs">recall, search, resume</text>
+<rect x="360" y="228" width="180" height="30" rx="8" class="box box-store"/><text x="450" y="248" class="bs">memory store</text>
+<g><rect x="20" y="40" width="250" height="88" rx="10" class="box box-attack"/><text x="145" y="68" class="bt">Front door</text><text x="145" y="90" class="bs">can only talk to the agent</text><text x="145" y="108" class="bs">six attacks, three channels</text></g>
+<path d="M272 84 C 300 84, 320 112, 358 112" class="flow" marker-end="url(#ah)"/>
+<g><rect x="20" y="182" width="250" height="88" rx="10" class="box box-attack"/><text x="145" y="210" class="bt">At rest</text><text x="145" y="232" class="bs">can write to the store, holds no keys</text><text x="145" y="250" class="bs">eight edits, T1 to T8</text></g>
+<path d="M272 240 C 300 240, 320 243, 358 243" class="flow" marker-end="url(#ah)"/>
+<g><rect x="630" y="100" width="250" height="100" rx="10" class="box"/><text x="755" y="130" class="bt">What agmi records</text><text x="755" y="152" class="bs">what came back from the read path</text><text x="755" y="170" class="bs">the tool's own verdict, its detail,</text><text x="755" y="188" class="bs">the version, the reproduction</text></g>
+<path d="M542 184 C 580 184, 590 150, 628 150" class="flow" marker-end="url(#ah)"/>
+</svg><figcaption>Two attacker positions. The front-door attacker writes through the agent and is scored on whether the planted memory comes back as context. The at-rest attacker edits the store directly and is scored on whether the tool notices on read.</figcaption></figure>
+<h2>How the suite is put together</h2>
+<figure class="diag"><svg viewBox="0 0 900 340" role="img" aria-labelledby="da-t"><title id="da-t">How the suite is put together</title>
+<rect x="20" y="30" width="200" height="130" rx="12" class="box"/><text x="120" y="58" class="bt">Attacks</text>
+<text x="120" y="82" class="bs">8 at-rest edits</text><text x="120" y="100" class="bs">6 front-door attacks</text><text x="120" y="118" class="bs">5 fixtures, 3 channels</text><text x="120" y="136" class="bs">content mutations</text>
+<path d="M222 95 H258" class="flow" marker-end="url(#ah)"/>
+<rect x="262" y="30" width="200" height="130" rx="12" class="box box-agent"/><text x="362" y="58" class="bt">Adapter interface</text>
+<text x="362" y="82" class="bs">seed, read raw, write raw</text><text x="362" y="100" class="bs">delete raw, reload, verify</text><text x="362" y="118" class="bs">seed other, replay onto</text><text x="362" y="136" class="bs">read meta, write meta</text>
+<path d="M464 95 H500" class="flow" marker-end="url(#ah)"/>
+<rect x="504" y="18" width="376" height="154" rx="12" class="box box-store"/><text x="692" y="44" class="bt">Real stores, pinned versions</text>
+<g class="chips">
+<rect x="524" y="60" width="160" height="30" rx="6" class="chip"/><text x="604" y="80" class="bs">LangGraph SqliteSaver</text>
+<rect x="700" y="60" width="160" height="30" rx="6" class="chip"/><text x="780" y="80" class="bs">Letta block history</text>
+<rect x="524" y="98" width="160" height="30" rx="6" class="chip"/><text x="604" y="118" class="bs">Mem0 local Qdrant</text>
+<rect x="700" y="98" width="160" height="30" rx="6" class="chip"/><text x="780" y="118" class="bs">inspeximus, 5 rows</text>
+<rect x="524" y="136" width="336" height="28" rx="6" class="chip chip-ref"/><text x="692" y="155" class="bs">reference stores: naive, defended, at-rest</text>
+</g>
+<path d="M362 162 V196" class="flow" marker-end="url(#ah)"/>
+<rect x="262" y="200" width="200" height="56" rx="12" class="box"/><text x="362" y="224" class="bt">full_runner</text><text x="362" y="244" class="bs">every store, every attack</text>
+<path d="M464 228 H500" class="flow" marker-end="url(#ah)"/>
+<rect x="504" y="200" width="180" height="56" rx="12" class="box box-verdict"/><text x="594" y="224" class="bt">scorecard.json</text><text x="594" y="244" class="bs">one results file, committed</text>
+<path d="M686 228 H722" class="flow" marker-end="url(#ah)"/>
+<rect x="726" y="184" width="154" height="88" rx="12" class="box"/><text x="803" y="208" class="bt">rendered</text><text x="803" y="228" class="bs">README tables</text><text x="803" y="246" class="bs">docs/scorecard.md</text><text x="803" y="264" class="bs">this website</text>
+<path d="M594 258 V294" class="flow" marker-end="url(#ah)"/>
+<rect x="434" y="298" width="320" height="32" rx="8" class="box box-attack"/><text x="594" y="319" class="bs">CI re-measures on every change; fails if any cell drifts</text>
+<rect x="20" y="200" width="200" height="72" rx="12" class="box"/><text x="120" y="224" class="bt">Memory agent</text><text x="120" y="244" class="bs">hunts for the first landing,</text><text x="120" y="262" class="bs">proves it, behind an authz gate</text>
+<path d="M222 236 H258" class="flow" marker-end="url(#ah)"/>
+</svg><figcaption>One attack is written once against the adapter interface and runs against every store. Everything published, the README, the scorecard file and this site, is rendered from one committed results file, and CI fails if they ever disagree.</figcaption></figure>
+<h2>What runs in a vendor's CI</h2>
+<figure class="diag"><svg viewBox="0 0 900 150" role="img" aria-labelledby="dc-t"><title id="dc-t">One step in a vendor's CI</title>
+<rect x="20" y="40" width="190" height="70" rx="10" class="box"/><text x="115" y="70" class="bt">your pull request</text><text x="115" y="92" class="bs">any change to the store</text>
+<path d="M212 75 H248" class="flow" marker-end="url(#ah)"/>
+<rect x="252" y="40" width="210" height="70" rx="10" class="box box-agent"/><text x="357" y="70" class="bt">the agmi Action</text><text x="357" y="92" class="bs">runs T1 to T8 on your adapter</text>
+<path d="M464 75 H500" class="flow" marker-end="url(#ah)"/>
+<rect x="504" y="20" width="170" height="50" rx="10" class="box box-rej"/><text x="589" y="41" class="bt">all rejected</text><text x="589" y="59" class="bs">job passes</text>
+<rect x="504" y="82" width="170" height="50" rx="10" class="box box-acc"/><text x="589" y="103" class="bt">one accepted</text><text x="589" y="121" class="bs">job fails, cell annotated</text>
+<path d="M676 45 H712" class="flow" marker-end="url(#ah)"/><path d="M676 107 H712" class="flow" marker-end="url(#ah)"/>
+<rect x="716" y="40" width="164" height="70" rx="10" class="box"/><text x="798" y="70" class="bt">Actions summary</text><text x="798" y="92" class="bs">the eight-row table</text>
+</svg><figcaption>The Action fails a vendor's build the moment their store serves an edited record as genuine, and writes the row into the job summary.</figcaption></figure>
+<h2>Design rules the code enforces</h2>
+<ul class="rules">
+<li><b>The tool speaks, we do not.</b> A cell is rejected or reported only if the tool raised, refused or named the problem itself. Comparing content and calling a difference "detected" is not allowed anywhere in the code.</li>
+<li><b>No verdict without a control.</b> A reload with no edit must verify; a genuine memory must be readable in the same store state. Otherwise the cell is n/a, never a pass.</li>
+<li><b>One results file.</b> The README, the scorecard document and this site are rendered from <code>results/scorecard.json</code>. Hand-edited tables cannot exist; CI checks all three against the file on every change.</li>
+<li><b>Versions are part of the result.</b> Every row records the library version and every attack carries a version. A row is a statement about one release, and a test fails the day that release changes its answer.</li>
+<li><b>Self-validating attacks.</b> A reference at-rest store that binds content, context, position and metadata must reject all eight edits, and a reference defended store must keep out what it is built to keep out. If an attack cannot be caught by a store built to catch it, the suite fails.</li>
+<li><b>Fail closed on targets.</b> The memory agent refuses any target the operator does not demonstrably control: library targets only, network hosts only on a host-named token or a consent file.</li>
+</ul>
+</section>
+</main>
+<footer class="foot">
+  <p>agmi 0.6.0. Measured 2026-09-26 on Darwin arm64, Python 3.12. Every cell on this site is read from the committed results file and reproduced in CI on every change.</p>
+  <p>Built and maintained by <a href="https://yashakhandelwal.com/">Yasha Khandelwal</a> (<a href="mailto:yasha.khandelwal@tech4biz.io">yasha.khandelwal@tech4biz.io</a>, <a href="https://orcid.org/0009-0005-2166-4951">ORCID</a>). Hosted assessments and vendor badges through <a href="https://audittraxlabs.com/">AuditTrax Labs</a>. MIT licence. <a href="https://github.com/tech4biz-yasha/agmi">Source</a>, <a href="https://pypi.org/project/agent-memory-integrity/">PyPI</a>, <a href="https://doi.org/10.5281/zenodo.22860886">Zenodo</a>, <a href="about.html">About</a>.</p>
+</footer>
+<div id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="drawer-card">
+    <button type="button" class="drawer-close" aria-label="Close">×</button>
+    <p class="drawer-kicker" id="dkick"></p>
+    <h2 id="dtitle"></h2>
+    <p id="dverdict" class="drawer-verdict"></p>
+    <dl>
+      <dt>What the tool said</dt><dd id="ddetail"></dd>
+      <dt>Detection point</dt><dd id="dpoint"></dd>
+      <dt>Reproduce</dt><dd><code id="drepro"></code></dd>
+    </dl>
+  </div>
+</div>
+<script src="site.js" defer></script>
+</body>
+</html>

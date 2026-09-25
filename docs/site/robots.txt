@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://agentmemoryintegrity.org/sitemap.xml

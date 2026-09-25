@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cite, Agent Memory Integrity</title>
+<meta name="description" content="How to cite the agmi software, method paper and the IETF 5.4.7 method text.">
+<meta name="author" content="Yasha Khandelwal">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<link rel="canonical" href="https://agentmemoryintegrity.org/cite.html">
+<meta property="og:title" content="Cite, Agent Memory Integrity">
+<meta property="og:description" content="How to cite the agmi software, method paper and the IETF 5.4.7 method text.">
+<meta property="og:url" content="https://agentmemoryintegrity.org/cite.html">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","@id":"https://agentmemoryintegrity.org/#software","name":"agmi: Agent Memory Integrity","codeRepository":"https://github.com/tech4biz-yasha/agmi","programmingLanguage":"Python","license":"https://opensource.org/licenses/MIT","version":"0.6.0","identifier":"https://doi.org/10.5281/zenodo.22860886","author":{"@id":"https://yashakhandelwal.com/#person"},"url":"https://agentmemoryintegrity.org/"},{"@type":"Person","@id":"https://yashakhandelwal.com/#person","name":"Yasha Khandelwal","url":"https://yashakhandelwal.com/","email":"yasha.khandelwal@tech4biz.io","sameAs":["https://orcid.org/0009-0005-2166-4951","https://github.com/tech4biz-yasha"]},{"@type":"Dataset","@id":"https://agentmemoryintegrity.org/#scorecard","name":"Agent Memory Integrity scorecard","url":"https://agentmemoryintegrity.org/scorecard.html","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://yashakhandelwal.com/#person"},"isBasedOn":"https://github.com/tech4biz-yasha/agmi","measurementTechnique":"Seed through the tool's own API, apply one edit to the store, restart, read through the tool's own read path, record the tool's own verdict"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="index.html"><img src="logo.svg" alt="" width="28" height="28"><span>Agent Memory Integrity</span></a>
+  <nav class="nav" aria-label="Site"><a href="index.html">Overview</a><a href="scorecard.html">Scorecard</a><a href="edits.html">The edits</a><a href="architecture.html">Architecture</a><a href="method.html">Method</a><a href="agent.html">Memory agent</a><a href="findings.html">Findings</a><a href="ecosystem.html">Ecosystem</a><a href="run.html">Run it</a><a href="cite.html" aria-current=page>Cite</a><a href="about.html">About</a></nav>
+  <a class="gh" href="https://github.com/tech4biz-yasha/agmi">GitHub</a>
+</header>
+<main id="main">
+<section class="part"><h1>Cite</h1>
+<p>Cite the concept DOI for the software; it always resolves to the latest version. Cite a version DOI when a specific release matters.</p>
+<dl class="cites">
+<dt>Software, all versions</dt><dd><a href="https://doi.org/10.5281/zenodo.22860886">10.5281/zenodo.22860886</a></dd>
+<dt>Software, v0.6.0</dt><dd><a href="https://doi.org/10.5281/zenodo.22957647">10.5281/zenodo.22957647</a></dd>
+<dt>Method paper (preprint)</dt><dd><a href="https://doi.org/10.5281/zenodo.22765627">10.5281/zenodo.22765627</a>, also SSRN 10.2139/ssrn.7461118</dd>
+<dt>Standards</dt><dd>Proposed test method for IETF draft-han-bmwg-agent-security-benchmark metric 5.4.7, <a href="https://mailarchive.ietf.org/arch/browse/bmwg/">bmwg list, 24 September 2026</a></dd>
+</dl>
+<pre><code>Khandelwal, Y. (2026). agmi: Agent Memory Integrity test suite (v0.6.0).
+Zenodo. https://doi.org/10.5281/zenodo.22860886</code></pre>
+<p>The repository ships a CITATION.cff, so GitHub's "Cite this repository" gives the same reference in BibTeX or APA.</p>
+</section>
+</main>
+<footer class="foot">
+  <p>agmi 0.6.0. Measured 2026-09-26 on Darwin arm64, Python 3.12. Every cell on this site is read from the committed results file and reproduced in CI on every change.</p>
+  <p>Built and maintained by <a href="https://yashakhandelwal.com/">Yasha Khandelwal</a> (<a href="mailto:yasha.khandelwal@tech4biz.io">yasha.khandelwal@tech4biz.io</a>, <a href="https://orcid.org/0009-0005-2166-4951">ORCID</a>). Hosted assessments and vendor badges through <a href="https://audittraxlabs.com/">AuditTrax Labs</a>. MIT licence. <a href="https://github.com/tech4biz-yasha/agmi">Source</a>, <a href="https://pypi.org/project/agent-memory-integrity/">PyPI</a>, <a href="https://doi.org/10.5281/zenodo.22860886">Zenodo</a>, <a href="about.html">About</a>.</p>
+</footer>
+<div id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="drawer-card">
+    <button type="button" class="drawer-close" aria-label="Close">×</button>
+    <p class="drawer-kicker" id="dkick"></p>
+    <h2 id="dtitle"></h2>
+    <p id="dverdict" class="drawer-verdict"></p>
+    <dl>
+      <dt>What the tool said</dt><dd id="ddetail"></dd>
+      <dt>Detection point</dt><dd id="dpoint"></dd>
+      <dt>Reproduce</dt><dd><code id="drepro"></code></dd>
+    </dl>
+  </div>
+</div>
+<script src="site.js" defer></script>
+</body>
+</html>

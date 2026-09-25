@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Run it, Agent Memory Integrity</title>
+<meta name="description" content="Run the eight at-rest edits against your memory store in one CI step, or on a laptop in under a minute.">
+<meta name="author" content="Yasha Khandelwal">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<link rel="canonical" href="https://agentmemoryintegrity.org/run.html">
+<meta property="og:title" content="Run it, Agent Memory Integrity">
+<meta property="og:description" content="Run the eight at-rest edits against your memory store in one CI step, or on a laptop in under a minute.">
+<meta property="og:url" content="https://agentmemoryintegrity.org/run.html">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","@id":"https://agentmemoryintegrity.org/#software","name":"agmi: Agent Memory Integrity","codeRepository":"https://github.com/tech4biz-yasha/agmi","programmingLanguage":"Python","license":"https://opensource.org/licenses/MIT","version":"0.6.0","identifier":"https://doi.org/10.5281/zenodo.22860886","author":{"@id":"https://yashakhandelwal.com/#person"},"url":"https://agentmemoryintegrity.org/"},{"@type":"Person","@id":"https://yashakhandelwal.com/#person","name":"Yasha Khandelwal","url":"https://yashakhandelwal.com/","email":"yasha.khandelwal@tech4biz.io","sameAs":["https://orcid.org/0009-0005-2166-4951","https://github.com/tech4biz-yasha"]},{"@type":"Dataset","@id":"https://agentmemoryintegrity.org/#scorecard","name":"Agent Memory Integrity scorecard","url":"https://agentmemoryintegrity.org/scorecard.html","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://yashakhandelwal.com/#person"},"isBasedOn":"https://github.com/tech4biz-yasha/agmi","measurementTechnique":"Seed through the tool's own API, apply one edit to the store, restart, read through the tool's own read path, record the tool's own verdict"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="index.html"><img src="logo.svg" alt="" width="28" height="28"><span>Agent Memory Integrity</span></a>
+  <nav class="nav" aria-label="Site"><a href="index.html">Overview</a><a href="scorecard.html">Scorecard</a><a href="edits.html">The edits</a><a href="architecture.html">Architecture</a><a href="method.html">Method</a><a href="agent.html">Memory agent</a><a href="findings.html">Findings</a><a href="ecosystem.html">Ecosystem</a><a href="run.html" aria-current=page>Run it</a><a href="cite.html">Cite</a><a href="about.html">About</a></nav>
+  <a class="gh" href="https://github.com/tech4biz-yasha/agmi">GitHub</a>
+</header>
+<main id="main">
+<section class="part"><h1>Run it</h1>
+<h2>In your CI, one step</h2>
+<figure class="diag"><svg viewBox="0 0 900 150" role="img" aria-labelledby="dc-t"><title id="dc-t">One step in a vendor's CI</title>
+<rect x="20" y="40" width="190" height="70" rx="10" class="box"/><text x="115" y="70" class="bt">your pull request</text><text x="115" y="92" class="bs">any change to the store</text>
+<path d="M212 75 H248" class="flow" marker-end="url(#ah)"/>
+<rect x="252" y="40" width="210" height="70" rx="10" class="box box-agent"/><text x="357" y="70" class="bt">the agmi Action</text><text x="357" y="92" class="bs">runs T1 to T8 on your adapter</text>
+<path d="M464 75 H500" class="flow" marker-end="url(#ah)"/>
+<rect x="504" y="20" width="170" height="50" rx="10" class="box box-rej"/><text x="589" y="41" class="bt">all rejected</text><text x="589" y="59" class="bs">job passes</text>
+<rect x="504" y="82" width="170" height="50" rx="10" class="box box-acc"/><text x="589" y="103" class="bt">one accepted</text><text x="589" y="121" class="bs">job fails, cell annotated</text>
+<path d="M676 45 H712" class="flow" marker-end="url(#ah)"/><path d="M676 107 H712" class="flow" marker-end="url(#ah)"/>
+<rect x="716" y="40" width="164" height="70" rx="10" class="box"/><text x="798" y="70" class="bt">Actions summary</text><text x="798" y="92" class="bs">the eight-row table</text>
+</svg><figcaption>The Action fails a vendor's build the moment their store serves an edited record as genuine, and writes the row into the job summary.</figcaption></figure>
+<p>The job fails the moment your store serves an edited record as genuine, and the row lands in the Actions summary.</p>
+<pre><code>- uses: tech4biz-yasha/agmi@v0.6.0
+  with:
+    adapter: agmi.adapters.langgraph_sqlite:LangGraphSqliteAdapter
+    extras: langgraph</code></pre>
+<p>For your own store, write an adapter against <code>agmi.adapters.base.MemoryAdapter</code> (seed, read raw, write raw, delete raw, reload, verify, plus the three optional replay and metadata hooks) and point the action at it with <code>install: "."</code>.</p>
+<h2>On a laptop</h2>
+<pre><code>pip install "agent-memory-integrity[langgraph]==0.6.0"
+agmi-check --adapter agmi.adapters.langgraph_sqlite:LangGraphSqliteAdapter</code></pre>
+<p>Exit 1 means at least one edit was accepted, exit 2 means nothing could be evaluated, exit 0 means every edit was rejected or reported. The whole scorecard, all stores, is <code>python agmi/full_runner.py --json results/scorecard.json</code>; Letta needs a Postgres (an embedded one starts if none is set) and Mem0 a local Qdrant, both handled by the adapters.</p>
+<h2>Submit a row</h2>
+<p>Maintainers of a memory store can open a pull request with an adapter and their measured row. The defended inspeximus rows on the scorecard came in this way from the tool's own maintainer, with the two control cases as tests. Contributions follow <a href="https://github.com/tech4biz-yasha/agmi/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p>
+</section>
+</main>
+<footer class="foot">
+  <p>agmi 0.6.0. Measured 2026-09-26 on Darwin arm64, Python 3.12. Every cell on this site is read from the committed results file and reproduced in CI on every change.</p>
+  <p>Built and maintained by <a href="https://yashakhandelwal.com/">Yasha Khandelwal</a> (<a href="mailto:yasha.khandelwal@tech4biz.io">yasha.khandelwal@tech4biz.io</a>, <a href="https://orcid.org/0009-0005-2166-4951">ORCID</a>). Hosted assessments and vendor badges through <a href="https://audittraxlabs.com/">AuditTrax Labs</a>. MIT licence. <a href="https://github.com/tech4biz-yasha/agmi">Source</a>, <a href="https://pypi.org/project/agent-memory-integrity/">PyPI</a>, <a href="https://doi.org/10.5281/zenodo.22860886">Zenodo</a>, <a href="about.html">About</a>.</p>
+</footer>
+<div id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="drawer-card">
+    <button type="button" class="drawer-close" aria-label="Close">×</button>
+    <p class="drawer-kicker" id="dkick"></p>
+    <h2 id="dtitle"></h2>
+    <p id="dverdict" class="drawer-verdict"></p>
+    <dl>
+      <dt>What the tool said</dt><dd id="ddetail"></dd>
+      <dt>Detection point</dt><dd id="dpoint"></dd>
+      <dt>Reproduce</dt><dd><code id="drepro"></code></dd>
+    </dl>
+  </div>
+</div>
+<script src="site.js" defer></script>
+</body>
+</html>

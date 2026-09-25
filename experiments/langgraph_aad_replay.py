@@ -6,7 +6,9 @@ Two edits, both using only genuine ciphertext written by the checkpointer itself
   C. head deletion: delete "bob"'s newest checkpoint row (no forging at all)
 Verdict per edit: ACCEPTED (forged state loaded) or REJECTED (load raised).
 """
-import sqlite3, sys, importlib.metadata as md
+import sqlite3
+import sys
+import importlib.metadata as md
 from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.sqlite import SqliteSaver
@@ -44,7 +46,8 @@ def read(app, tid):
 def main():
     print("langgraph-checkpoint", md.version("langgraph-checkpoint"),
           "| langgraph-checkpoint-sqlite", md.version("langgraph-checkpoint-sqlite"))
-    import inspect, langgraph.checkpoint.serde.encrypted as enc
+    import inspect
+    import langgraph.checkpoint.serde.encrypted as enc
     print("AAD binding present in EncryptedSerializer:", "aad" in inspect.getsource(enc))
     results = {}
 

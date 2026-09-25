@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Method, Agent Memory Integrity</title>
+<meta name="description" content="How each cell is measured: the tool&#x27;s own verdict, two control cases, the two threat models, and the IETF 5.4.7 mapping.">
+<meta name="author" content="Yasha Khandelwal">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<link rel="canonical" href="https://agentmemoryintegrity.org/method.html">
+<meta property="og:title" content="Method, Agent Memory Integrity">
+<meta property="og:description" content="How each cell is measured: the tool&#x27;s own verdict, two control cases, the two threat models, and the IETF 5.4.7 mapping.">
+<meta property="og:url" content="https://agentmemoryintegrity.org/method.html">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","@id":"https://agentmemoryintegrity.org/#software","name":"agmi: Agent Memory Integrity","codeRepository":"https://github.com/tech4biz-yasha/agmi","programmingLanguage":"Python","license":"https://opensource.org/licenses/MIT","version":"0.6.0","identifier":"https://doi.org/10.5281/zenodo.22860886","author":{"@id":"https://yashakhandelwal.com/#person"},"url":"https://agentmemoryintegrity.org/"},{"@type":"Person","@id":"https://yashakhandelwal.com/#person","name":"Yasha Khandelwal","url":"https://yashakhandelwal.com/","email":"yasha.khandelwal@tech4biz.io","sameAs":["https://orcid.org/0009-0005-2166-4951","https://github.com/tech4biz-yasha"]},{"@type":"Dataset","@id":"https://agentmemoryintegrity.org/#scorecard","name":"Agent Memory Integrity scorecard","url":"https://agentmemoryintegrity.org/scorecard.html","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://yashakhandelwal.com/#person"},"isBasedOn":"https://github.com/tech4biz-yasha/agmi","measurementTechnique":"Seed through the tool's own API, apply one edit to the store, restart, read through the tool's own read path, record the tool's own verdict"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="index.html"><img src="logo.svg" alt="" width="28" height="28"><span>Agent Memory Integrity</span></a>
+  <nav class="nav" aria-label="Site"><a href="index.html">Overview</a><a href="scorecard.html">Scorecard</a><a href="edits.html">The edits</a><a href="architecture.html">Architecture</a><a href="method.html" aria-current=page>Method</a><a href="agent.html">Memory agent</a><a href="findings.html">Findings</a><a href="ecosystem.html">Ecosystem</a><a href="run.html">Run it</a><a href="cite.html">Cite</a><a href="about.html">About</a></nav>
+  <a class="gh" href="https://github.com/tech4biz-yasha/agmi">GitHub</a>
+</header>
+<main id="main">
+<section class="part"><h1>Method</h1>
+<p>The rule that makes every cell a measurement and not an opinion: the verdict is what the tool does, never what we infer. We seed through the tool's own API, apply one edit to the store, restart, and read through the tool's own read path. If it raises or refuses, that is rejected. If its documented audit names the problem, that is reported. If it serves the altered memory and says nothing, that is accepted. We never compare content and call a difference "detected", because the tool did not say anything.</p>
+<h2>Two controls before any verdict</h2>
+<p>A reload with no edit must still verify, or the cell is n/a; without this a store that cannot reopen its own files would score a perfect pass. And for the front-door attacks, the victim must be able to read back a genuine memory they wrote, in the same store state; without this an empty answer would satisfy "not surfaced".</p>
+<h2>The threat models</h2>
+<figure class="diag"><svg viewBox="0 0 900 300" role="img" aria-labelledby="dt-t"><title id="dt-t">Where the attacker stands</title>
+<rect x="330" y="30" width="240" height="240" rx="14" class="box box-agent"/><text x="450" y="62" class="bt">The agent</text>
+<rect x="360" y="84" width="180" height="56" rx="8" class="box"/><text x="450" y="108" class="bt">write path</text><text x="450" y="128" class="bs">remember, add, put</text>
+<rect x="360" y="156" width="180" height="56" rx="8" class="box"/><text x="450" y="180" class="bt">read path</text><text x="450" y="200" class="bs">recall, search, resume</text>
+<rect x="360" y="228" width="180" height="30" rx="8" class="box box-store"/><text x="450" y="248" class="bs">memory store</text>
+<g><rect x="20" y="40" width="250" height="88" rx="10" class="box box-attack"/><text x="145" y="68" class="bt">Front door</text><text x="145" y="90" class="bs">can only talk to the agent</text><text x="145" y="108" class="bs">six attacks, three channels</text></g>
+<path d="M272 84 C 300 84, 320 112, 358 112" class="flow" marker-end="url(#ah)"/>
+<g><rect x="20" y="182" width="250" height="88" rx="10" class="box box-attack"/><text x="145" y="210" class="bt">At rest</text><text x="145" y="232" class="bs">can write to the store, holds no keys</text><text x="145" y="250" class="bs">eight edits, T1 to T8</text></g>
+<path d="M272 240 C 300 240, 320 243, 358 243" class="flow" marker-end="url(#ah)"/>
+<g><rect x="630" y="100" width="250" height="100" rx="10" class="box"/><text x="755" y="130" class="bt">What agmi records</text><text x="755" y="152" class="bs">what came back from the read path</text><text x="755" y="170" class="bs">the tool's own verdict, its detail,</text><text x="755" y="188" class="bs">the version, the reproduction</text></g>
+<path d="M542 184 C 580 184, 590 150, 628 150" class="flow" marker-end="url(#ah)"/>
+</svg><figcaption>Two attacker positions. The front-door attacker writes through the agent and is scored on whether the planted memory comes back as context. The at-rest attacker edits the store directly and is scored on whether the tool notices on read.</figcaption></figure>
+<p><b>At rest.</b> The adversary has write access to the medium that holds the store but holds none of the tool's keys: a compromised host, a shared database credential, an injection flaw in a co-located application, a restored backup, a malicious operator. Because the adversary can write anything, an integrity value stored next to the data protects nothing unless it is bound to a secret the adversary does not hold. So the method measures the read path, not the presence of integrity fields.</p>
+<p><b>Front door.</b> The adversary can only write through the agent, on one of three channels: external (no label), laundered (a forged first-party label, no key), and agent-laundered (a forged label carrying a valid signature). Provenance alone is never allowed to pass a content cell.</p>
+<h2>The IETF mapping</h2>
+<p>China Mobile's draft-han-bmwg-agent-security-benchmark-00 defines metric 5.4.7, "Protection of Memory Data Integrity", with no test method. On 24 September 2026 the eight edits T1 to T8, the verdict words, the two control cases and the scoring rule were sent to the BMWG list as proposed text for a new Section 6.6, with the measured verdicts above. agmi is the reference implementation of that text. <a href="https://mailarchive.ietf.org/arch/browse/bmwg/">Archive.</a></p>
+<h2>Why T6 and T7 matter more than they look</h2>
+<p>Encryption at rest keeps an attacker from reading a record. It does not stop them moving one. A genuine encrypted record copied to another user's slot decrypts and verifies, because as far as the cipher is concerned the bytes are authentic. Only a store that binds a record to its context and its position in the sequence rejects T6 and T7. That is the difference between confidentiality and integrity, and it is where every store measured so far scores zero.</p>
+<h2>Self-validation</h2>
+<p>A reference at-rest store ships with the suite: an HMAC over content, context, position, previous tag and metadata, plus a signed head pointer. It rejects all eight edits by construction. A test asserts that, so if an edit could not be caught even by a store built to catch it, the edit proves nothing and the suite fails.</p>
+</section>
+</main>
+<footer class="foot">
+  <p>agmi 0.6.0. Measured 2026-09-26 on Darwin arm64, Python 3.12. Every cell on this site is read from the committed results file and reproduced in CI on every change.</p>
+  <p>Built and maintained by <a href="https://yashakhandelwal.com/">Yasha Khandelwal</a> (<a href="mailto:yasha.khandelwal@tech4biz.io">yasha.khandelwal@tech4biz.io</a>, <a href="https://orcid.org/0009-0005-2166-4951">ORCID</a>). Hosted assessments and vendor badges through <a href="https://audittraxlabs.com/">AuditTrax Labs</a>. MIT licence. <a href="https://github.com/tech4biz-yasha/agmi">Source</a>, <a href="https://pypi.org/project/agent-memory-integrity/">PyPI</a>, <a href="https://doi.org/10.5281/zenodo.22860886">Zenodo</a>, <a href="about.html">About</a>.</p>
+</footer>
+<div id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="drawer-card">
+    <button type="button" class="drawer-close" aria-label="Close">×</button>
+    <p class="drawer-kicker" id="dkick"></p>
+    <h2 id="dtitle"></h2>
+    <p id="dverdict" class="drawer-verdict"></p>
+    <dl>
+      <dt>What the tool said</dt><dd id="ddetail"></dd>
+      <dt>Detection point</dt><dd id="dpoint"></dd>
+      <dt>Reproduce</dt><dd><code id="drepro"></code></dd>
+    </dl>
+  </div>
+</div>
+<script src="site.js" defer></script>
+</body>
+</html>

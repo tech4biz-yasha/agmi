@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Findings, Agent Memory Integrity</title>
+<meta name="description" content="Dated findings from measuring agent memory stores: cross-context replay, rollback, receipts that do not bind the user, and a vendor fix caught by re-measurement.">
+<meta name="author" content="Yasha Khandelwal">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<link rel="canonical" href="https://agentmemoryintegrity.org/findings.html">
+<meta property="og:title" content="Findings, Agent Memory Integrity">
+<meta property="og:description" content="Dated findings from measuring agent memory stores: cross-context replay, rollback, receipts that do not bind the user, and a vendor fix caught by re-measurement.">
+<meta property="og:url" content="https://agentmemoryintegrity.org/findings.html">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","@id":"https://agentmemoryintegrity.org/#software","name":"agmi: Agent Memory Integrity","codeRepository":"https://github.com/tech4biz-yasha/agmi","programmingLanguage":"Python","license":"https://opensource.org/licenses/MIT","version":"0.6.0","identifier":"https://doi.org/10.5281/zenodo.22860886","author":{"@id":"https://yashakhandelwal.com/#person"},"url":"https://agentmemoryintegrity.org/"},{"@type":"Person","@id":"https://yashakhandelwal.com/#person","name":"Yasha Khandelwal","url":"https://yashakhandelwal.com/","email":"yasha.khandelwal@tech4biz.io","sameAs":["https://orcid.org/0009-0005-2166-4951","https://github.com/tech4biz-yasha"]},{"@type":"Dataset","@id":"https://agentmemoryintegrity.org/#scorecard","name":"Agent Memory Integrity scorecard","url":"https://agentmemoryintegrity.org/scorecard.html","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://yashakhandelwal.com/#person"},"isBasedOn":"https://github.com/tech4biz-yasha/agmi","measurementTechnique":"Seed through the tool's own API, apply one edit to the store, restart, read through the tool's own read path, record the tool's own verdict"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="index.html"><img src="logo.svg" alt="" width="28" height="28"><span>Agent Memory Integrity</span></a>
+  <nav class="nav" aria-label="Site"><a href="index.html">Overview</a><a href="scorecard.html">Scorecard</a><a href="edits.html">The edits</a><a href="architecture.html">Architecture</a><a href="method.html">Method</a><a href="agent.html">Memory agent</a><a href="findings.html" aria-current=page>Findings</a><a href="ecosystem.html">Ecosystem</a><a href="run.html">Run it</a><a href="cite.html">Cite</a><a href="about.html">About</a></nav>
+  <a class="gh" href="https://github.com/tech4biz-yasha/agmi">GitHub</a>
+</header>
+<main id="main">
+<section class="part"><h1>Findings</h1><p>What the measurements turned up, newest first. Each one is on the record with a date, and where a vendor thread exists it is linked.</p><article class="finding"><time>2026-09-25</time><h2>Four of four stores accept all eight at-rest edits</h2><p>LangGraph SqliteSaver, Letta block history, Mem0 local Qdrant and inspeximus in its default configuration all serve every one of the eight storage-level edits as genuine. None of the four checks anything on read.</p></article><article class="finding"><time>2026-09-25</time><h2>A receipt does not bind the owning user (inspeximus)</h2><p>With receipts on, inspeximus&#x27;s audit catches seven of the eight edits, but not T6: a genuine signed record lifted from another user&#x27;s context still passes, because the receipt commits to the record&#x27;s text and key and not to who it belongs to. Rollback (T7) and metadata edits (T8) are caught. Raised with the maintainer.</p></article><article class="finding"><time>2026-09-24</time><h2>Encryption without identity binding (LangGraph #9004)</h2><p>LangGraph&#x27;s EncryptedSerializer authenticates the ciphertext but not the record&#x27;s place, so a genuine encrypted checkpoint from one thread verifies in another (T6) and an older one verifies over the newest (T7). A proposed fix binding thread, checkpoint id and channel as AEAD associated data rejects both; deleting the head row (T2) still rolls the thread back, because binding a record to its place cannot see a record that has been removed.</p><p><a href="https://github.com/langchain-ai/langgraph/issues/9004">Vendor thread</a></p></article><article class="finding"><time>2026-09-22</time><h2>A vendor fix, caught by re-measurement (inspeximus 3.5.2)</h2><p>After the maintainer shipped a write-time quarantine and a stuffing penalty, the hidden-instruction and retrieval-hijack cells moved from surfaced on all five fixtures to surfaced on one and two. The cells stay surfaced, since a tool is kept out only when the attacker wins none, but the defence is engaging and the change is on record.</p></article><article class="finding"><time>2026-09-14</time><h2>A forward-only hash chain misses truncation (OpenFang)</h2><p>A chain that walks forward from the first record verifies every link and never notices that the last two are gone. Persisting the tip closes exactly that gap. This was the first result the suite produced and the reason the reference model exists.</p></article></section>
+</main>
+<footer class="foot">
+  <p>agmi 0.6.0. Measured 2026-09-26 on Darwin arm64, Python 3.12. Every cell on this site is read from the committed results file and reproduced in CI on every change.</p>
+  <p>Built and maintained by <a href="https://yashakhandelwal.com/">Yasha Khandelwal</a> (<a href="mailto:yasha.khandelwal@tech4biz.io">yasha.khandelwal@tech4biz.io</a>, <a href="https://orcid.org/0009-0005-2166-4951">ORCID</a>). Hosted assessments and vendor badges through <a href="https://audittraxlabs.com/">AuditTrax Labs</a>. MIT licence. <a href="https://github.com/tech4biz-yasha/agmi">Source</a>, <a href="https://pypi.org/project/agent-memory-integrity/">PyPI</a>, <a href="https://doi.org/10.5281/zenodo.22860886">Zenodo</a>, <a href="about.html">About</a>.</p>
+</footer>
+<div id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="drawer-card">
+    <button type="button" class="drawer-close" aria-label="Close">×</button>
+    <p class="drawer-kicker" id="dkick"></p>
+    <h2 id="dtitle"></h2>
+    <p id="dverdict" class="drawer-verdict"></p>
+    <dl>
+      <dt>What the tool said</dt><dd id="ddetail"></dd>
+      <dt>Detection point</dt><dd id="dpoint"></dd>
+      <dt>Reproduce</dt><dd><code id="drepro"></code></dd>
+    </dl>
+  </div>
+</div>
+<script src="site.js" defer></script>
+</body>
+</html>
